@@ -2,10 +2,10 @@
  * 我的挫折思考小測驗 — Google Apps Script 後端（網頁放在 GitHub Pages）
  * 請綁定在要存資料的 Google 試算表上（擴充功能 → Apps Script）。
  * 部署：網頁應用程式／執行身分：我／存取：所有人
- * ↓↓ 第 8 行：請改成你自己的教師密碼（保持 change-me 會一律登入失敗）
- * （密碼只存在 Apps Script 裡，不會放上 GitHub）
+ * 教師密碼請設在「專案設定 → 指令碼屬性」：屬性 TEACHER_PASSWORD
+ *  （設一次就好，之後重新貼上程式也不用再改；密碼不會出現在 GitHub）
  */
-var TEACHER_PASSWORD = 'change-me';
+var TEACHER_PASSWORD = 'change-me'; // 第 8 行：沒設指令碼屬性時才會用到
 
 var SHEET_NAME = '前測資料';
 var QUESTION_SHEET_NAME = '題目對照';
@@ -79,7 +79,8 @@ function json_(obj) {
 
 /* 密碼由後端驗證；預設 change-me 一律視為錯誤 */
 function requirePw_(pw) {
-  if (!TEACHER_PASSWORD || TEACHER_PASSWORD === 'change-me' || String(pw || '') !== TEACHER_PASSWORD) {
+  var real = PropertiesService.getScriptProperties().getProperty('TEACHER_PASSWORD') || TEACHER_PASSWORD;
+  if (!real || real === 'change-me' || String(pw || '') !== String(real)) {
     throw new Error('密碼錯誤');
   }
 }
