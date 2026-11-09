@@ -383,12 +383,12 @@
   </div>
 </div>
 
-<script src="config.js?v=4"></script>
+<script src="config.js?v=5"></script>
 <script>
 /* 後端網址設定在 config.js（window.MZ_CONFIG.sheetApi）。未設定時為「本機模式」，資料只存在這台裝置。 */
 var CONFIG = {
   SCRIPT_URL: ((window.MZ_CONFIG||{}).sheetApi||'').trim(),
-  VERSION: 'pretest-v2'
+  VERSION: 'pretest-v3'
 };
 
 /* ---------- 情境與題目（文字依研究設計，請勿任意更動） ---------- */
@@ -412,19 +412,19 @@ var REASONS = [
 ];
 
 var QUESTIONS = [
-  { title:'如果你是故事中的他', text:'你認為故事中的主角現在可能有什麼感受？為什麼？',
-    hint:'試著想一想，如果是你遇到這件事，可能會有什麼感覺？', icon:'heart', tone:'orange' },
-  { title:'事情為什麼會變成這樣？', text:'除了主角自己想到的原因之外，你認為這件事情還可能有哪些原因？',
-    hint:'試著從不同角度想一想，不一定只有一個原因。', icon:'branch', tone:'blue' },
-  { title:'這個原因會一直存在嗎？', text:'你認為主角這次遇到的困難或失敗原因，以後還會一直存在嗎？為什麼？',
-    hint:'有些事情可能不容易改變，有些事情則可能隨著情況而不同。', icon:'clock', tone:'green',
+  { title:'試著理解主角', text:'你認為故事中的主角現在可能有什麼感受？你從故事中的哪些地方這樣想？',
+    hint:'可以回到故事裡看看，是哪些句子或細節讓你這樣想。', icon:'heart', tone:'orange' },
+  { title:'事情為什麼會這樣？', text:'你認為這件事情發生的原因可能有哪些？除了故事中提到的情況，還有沒有其他可能？',
+    hint:'原因可能不只一個，想到幾個就寫幾個。', icon:'branch', tone:'blue' },
+  { title:'這些原因會一直存在嗎？', text:'你認為造成這次困難的原因，以後還會一直存在嗎？哪些可能改變？哪些可能不容易改變？為什麼？',
+    hint:'可以把想到的原因分開來想，一個一個說說看。', icon:'clock', tone:'green',
     choice:{ key:'c3', prompt:'你覺得這次的原因，以後會？', options:['大概會一直存在','可能會隨情況改變','不確定'] } },
   { title:'哪些事情可以改變？', text:'在這個情境中，哪些事情是主角自己可以改變的？哪些事情不一定能由他控制？',
     hint:'試著分別想想看，哪些事情可以靠自己調整，哪些事情可能受到其他因素影響。', icon:'hand', tone:'orange',
     parts:['主角自己可以改變的事情','不一定能由他控制的事情'],
     choice:{ key:'c4', prompt:'整體來說，這件事主要是？', options:['主角自己可以控制的','主角不太能控制的','兩者都有','不確定'] } },
-  { title:'換個角度想想', text:'如果你是故事中的主角，你會怎麼看待這次的經驗？為什麼？',
-    hint:'你可以同意主角原本的想法，也可以有不同的看法。', icon:'eye', tone:'blue',
+  { title:'重新看看這件事', text:'如果重新看待這件事，你會怎麼理解主角遇到的困難？你認為還可以有哪些不同的看法？為什麼？',
+    hint:'你的看法可以和主角一樣，也可以不一樣。', icon:'eye', tone:'blue',
     choice:{ key:'c5', prompt:'你對這次經驗的看法，和主角原本的想法比較起來？', options:['差不多相同','部分相同','不太一樣','不確定'] } },
   { title:'接下來可以怎麼做？', text:'如果主角之後再次遇到類似的情況，你認為他可以怎麼做？也可以選擇不再嘗試，請說明你的理由。',
     hint:'沒有一定要選擇哪一種做法，重要的是說明你的想法。', icon:'path', tone:'green',
@@ -934,7 +934,7 @@ $('codeCopy').addEventListener('click', function(){ copyText($('codeText').value
 var PW_KEY='frustration-pretest-pw', tRows=[], tOpen={}, sTimer=null;
 function getPw(){ try{ return sessionStorage.getItem(PW_KEY)||''; }catch(e){ return ''; } }
 function setPw(v){ try{ if(v) sessionStorage.setItem(PW_KEY,v); else sessionStorage.removeItem(PW_KEY); }catch(e){} }
-var QLABEL=['Q1 主角感受','Q2 其他可能原因','Q3 原因是否持續','Q4 可改變與不可控制','Q5 如何看待經驗','Q6 接下來的做法'];
+var QLABEL=['Q1 理解主角感受','Q2 可能的原因','Q3 原因以後會不會改變','Q4 可改變與不可控制','Q5 重新看待這件事','Q6 接下來的做法'];
 
 function flagsOf(r){
   var f=[], thr=+$('tThr').value||0;
