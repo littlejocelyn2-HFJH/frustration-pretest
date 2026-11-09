@@ -119,6 +119,7 @@
   .qtext{font-size:18px;font-weight:500;margin:4px 0 10px;line-height:1.7}
   .qhint{color:var(--muted);font-size:15px;margin:0 0 14px;padding-left:12px;border-left:3px solid var(--line)}
   textarea.input{min-height:170px;resize:vertical;line-height:1.7}
+  .prev-ans{background:#f6f1e8;border-radius:12px;padding:10px 14px;margin:0 0 6px;white-space:pre-wrap;font-size:15px;color:#46525a}
   .part-label{display:block;font-weight:700;margin:14px 0 6px;color:var(--ink)}
   textarea.input.part{min-height:120px}
   .dots{display:flex;gap:6px;margin:0 0 16px}
@@ -383,12 +384,12 @@
   </div>
 </div>
 
-<script src="config.js?v=5"></script>
+<script src="config.js?v=6"></script>
 <script>
 /* 後端網址設定在 config.js（window.MZ_CONFIG.sheetApi）。未設定時為「本機模式」，資料只存在這台裝置。 */
 var CONFIG = {
   SCRIPT_URL: ((window.MZ_CONFIG||{}).sheetApi||'').trim(),
-  VERSION: 'pretest-v3'
+  VERSION: 'pretest-v4'
 };
 
 /* ---------- 情境與題目（文字依研究設計，請勿任意更動） ---------- */
@@ -412,23 +413,23 @@ var REASONS = [
 ];
 
 var QUESTIONS = [
-  { title:'試著理解主角', text:'你認為故事中的主角現在可能有什麼感受？你從故事中的哪些地方這樣想？',
-    hint:'可以回到故事裡看看，是哪些句子或細節讓你這樣想。', icon:'heart', tone:'orange' },
+  { title:'試著理解主角', text:'你認為故事中的主角現在可能有什麼感受？故事中的哪些事情或細節，讓你這樣想？',
+    hint:'可以回到故事裡看看，是哪些句子或細節讓你產生這樣的想法。', icon:'heart', tone:'orange' },
   { title:'事情為什麼會這樣？', text:'你認為這件事情發生的原因可能有哪些？除了故事中提到的情況，還有沒有其他可能？',
-    hint:'原因可能不只一個，想到幾個就寫幾個。', icon:'branch', tone:'blue' },
-  { title:'這些原因會一直存在嗎？', text:'你認為造成這次困難的原因，以後還會一直存在嗎？哪些可能改變？哪些可能不容易改變？為什麼？',
-    hint:'可以把想到的原因分開來想，一個一個說說看。', icon:'clock', tone:'green',
-    choice:{ key:'c3', prompt:'你覺得這次的原因，以後會？', options:['大概會一直存在','可能會隨情況改變','不確定'] } },
-  { title:'哪些事情可以改變？', text:'在這個情境中，哪些事情是主角自己可以改變的？哪些事情不一定能由他控制？',
-    hint:'試著分別想想看，哪些事情可以靠自己調整，哪些事情可能受到其他因素影響。', icon:'hand', tone:'orange',
-    parts:['主角自己可以改變的事情','不一定能由他控制的事情'],
-    choice:{ key:'c4', prompt:'整體來說，這件事主要是？', options:['主角自己可以控制的','主角不太能控制的','兩者都有','不確定'] } },
-  { title:'重新看看這件事', text:'如果重新看待這件事，你會怎麼理解主角遇到的困難？你認為還可以有哪些不同的看法？為什麼？',
-    hint:'你的看法可以和主角一樣，也可以不一樣。', icon:'eye', tone:'blue',
-    choice:{ key:'c5', prompt:'你對這次經驗的看法，和主角原本的想法比較起來？', options:['差不多相同','部分相同','不太一樣','不確定'] } },
+    hint:'原因可能不只一個，可以從主角自己、身邊的人，以及當時的情況來想。', icon:'branch', tone:'blue' },
+  { title:'這些原因會一直存在嗎？', text:'回頭看看你剛才寫下的原因，你覺得哪些原因可能隨著時間或情況改變？哪些可能不容易改變？為什麼？',
+    hint:'可以把剛才想到的原因分開來想，不需要每個原因都一樣。', icon:'clock', tone:'green', showPrev:1,
+    parts:['可能隨時間或情況改變的原因','可能不容易改變的原因','為什麼這樣想？'],
+    choice:{ key:'c3', prompt:'你覺得這次的原因，以後會？', options:['大概會一直存在','可能隨情況改變','不確定'] } },
+  { title:'哪些事情可以改變？', text:'在這個情境中，哪些部分可以透過主角自己的行動調整？哪些部分可能受到其他人或環境影響，不一定能由主角決定？',
+    hint:'試著分別想想，哪些事情可以靠自己調整，哪些事情需要其他條件配合。', icon:'hand', tone:'orange',
+    parts:['可以透過主角自己的行動調整的事情','不一定能由主角控制的事情'],
+    choice:{ key:'c4', prompt:'整體來說，你認為這件事情主要屬於哪一種情況？', options:['大部分可以靠自己的行動調整','有些可以調整，有些不能完全控制','大部分受到外在因素影響','不確定'] } },
+  { title:'重新看看這件事', text:'重新思考這件事之後，你現在的看法和一開始閱讀故事時的想法相比，有什麼不同？為什麼？',
+    hint:'你的看法可以和一開始相同，也可以不同。重要的是說明你現在怎麼想。', icon:'eye', tone:'blue',
+    choice:{ key:'c5', prompt:'你對這次經驗的看法，和一開始閱讀故事時的想法相比？', options:['和一開始的想法差不多','有些地方相同，有些地方不同','和一開始的想法不太一樣','我還不確定'] } },
   { title:'接下來可以怎麼做？', text:'如果主角之後再次遇到類似的情況，你認為他可以怎麼做？也可以選擇不再嘗試，請說明你的理由。',
-    hint:'沒有一定要選擇哪一種做法，重要的是說明你的想法。', icon:'path', tone:'green',
-    choice:{ key:'c6', prompt:'你覺得主角之後比較適合？', options:['用原本的方式再試一次','換個方法再試','先暫停，之後再決定','不再嘗試這件事','不確定'] } }
+    hint:'可以從調整方法、尋求協助、暫時休息、重新設定目標，或其他做法來思考。', icon:'path', tone:'green' }
 ];
 
 /* ---------- 插畫（同一套人物模組與配色，確保四張風格一致） ---------- */
@@ -781,7 +782,9 @@ function renderQ(){
         return '<label class="opt"><input type="radio" name="qc" value="'+esc(o)+'"'+(cur===o?' checked':'')+'><span class="dot"></span><span>'+o+'</span></label>';
       }).join('')+'</div>';
   } else if(ps){
-    box='<p class="qhint">'+q.hint+'</p>'+q.parts.map(function(l,k){
+    box='<p class="qhint">'+q.hint+'</p>'+
+      (q.showPrev && state.answers[q.showPrev].trim() ? '<div class="prev-ans"><div class="small" style="font-weight:700">你在第 '+(q.showPrev+1)+' 題寫的原因：</div>'+esc(state.answers[q.showPrev])+'</div>' : '')+
+      q.parts.map(function(l,k){
       return '<label for="ans'+k+'" class="part-label">'+(k+1)+'. '+l+'</label>'+
         '<textarea class="input part" id="ans'+k+'" maxlength="1500" placeholder="在這裡寫下你的想法">'+esc(ps[k])+'</textarea>';
     }).join('');
@@ -808,7 +811,7 @@ $('qNext').addEventListener('click', function(){
     var ps=partsOf(qIndex);
     if(ps){
       for(var k=0;k<ps.length;k++){ if(!ps[k].trim()){
-        $('eAns').textContent='「'+q.parts[k]+'」這一格還沒有寫喔。寫下你現在想到的就可以。'; $('ans'+k).focus(); return; } }
+        $('eAns').textContent='「'+q.parts[k].replace(/？$/,'')+'」這一格還沒有寫喔。寫下你現在想到的就可以；如果想不到，也可以寫「沒有」或「不確定」。'; $('ans'+k).focus(); return; } }
     } else if(!state.answers[qIndex].trim()){ $('eAns').textContent='這題還沒有寫喔。寫下你現在想到的就可以。'; $('ans').focus(); return; }
     if(q.choice){ goQ(qIndex,'choice'); return; }
   } else {
@@ -846,7 +849,7 @@ function buildPayload(){
     reasonCode: state.reason, reasonText: r ? r.t : '', reasonOther: state.reason==='5' ? state.reasonOther : '',
     q1: state.answers[0], q2: state.answers[1], q3: state.answers[2],
     q4: state.answers[3], q5: state.answers[4], q6: state.answers[5],
-    c3: state.choices.c3||'', c4: state.choices.c4||'', c5: state.choices.c5||'', c6: state.choices.c6||'',
+    c3: state.choices.c3||'', c4: state.choices.c4||'', c5: state.choices.c5||'',
     startedAt: state.startedAt, clientSubmittedAt: new Date().toISOString(),
     device: deviceType()
   };
@@ -871,7 +874,7 @@ function localRows(){
   return localAll().map(function(p){
     var st=new Date(p.startedAt), en=new Date(p.serverTime);
     return { time:fmtTime(en), className:p.className, code:p.studentCode, scenario:p.scenario, scenarioTitle:p.scenarioTitle,
-      reasonCode:p.reasonCode, reason:p.reasonText, reasonOther:p.reasonOther, q1:p.q1,q2:p.q2,q3:p.q3,q4:p.q4,q5:p.q5,q6:p.q6,c3:p.c3,c4:p.c4,c5:p.c5,c6:p.c6,
+      reasonCode:p.reasonCode, reason:p.reasonText, reasonOther:p.reasonOther, q1:p.q1,q2:p.q2,q3:p.q3,q4:p.q4,q5:p.q5,q6:p.q6,c3:p.c3,c4:p.c4,c5:p.c5,
       startedAt:fmtTime(st), seconds:Math.round((en-st)/1000), device:p.device, id:p.submissionId, note:'' };
   });
 }
@@ -1002,9 +1005,9 @@ $('tReload').addEventListener('click', function(){ loadTeacher().catch(function(
 $('tTable').addEventListener('click', function(e){ var tr=e.target.closest('tr.r'); if(!tr) return; var id=tr.getAttribute('data-id'); tOpen[id]=!tOpen[id]; renderTeacher(); });
 $('tCopy').addEventListener('click', function(){
   function q(v){ v=(v==null?'':String(v)); return /[\t\n"]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
-  var head=['提交時間','班級','座號或研究代碼','情境代號','情境標題','選擇原因代號','選擇原因','其他原因說明','Q1','Q2','Q3','Q4','Q5','Q6','C3','C4','C5','C6','開始作答時間','作答秒數','裝置','提醒','提交ID'];
+  var head=['提交時間','班級','座號或研究代碼','情境代號','情境標題','選擇原因代號','選擇原因','其他原因說明','Q1','Q2','Q3','Q4','Q5','Q6','C3','C4','C5','開始作答時間','作答秒數','裝置','提醒','提交ID'];
   var lines=[head.join('\t')].concat(filtered().map(function(r){
-    return [r.time,r.className,r.code,r.scenario,r.scenarioTitle,r.reasonCode,r.reason,r.reasonOther,r.q1,r.q2,r.q3,r.q4,r.q5,r.q6,r.c3,r.c4,r.c5,r.c6,r.startedAt,r.seconds,r.device,flagsOf(r).join('、'),r.id].map(q).join('\t');
+    return [r.time,r.className,r.code,r.scenario,r.scenarioTitle,r.reasonCode,r.reason,r.reasonOther,r.q1,r.q2,r.q3,r.q4,r.q5,r.q6,r.c3,r.c4,r.c5,r.startedAt,r.seconds,r.device,flagsOf(r).join('、'),r.id].map(q).join('\t');
   }));
   copyText(lines.join('\n'), $('tMsg'));
 });
