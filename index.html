@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>我的挫折思考小測驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf6ef; --paper:#fffdf9; --ink:#2f3a40; --muted:#6b7378; --line:#e6ddcf;
+    --blue:#5f86a6; --blue-soft:#e4edf3; --green:#6f9a7e; --green-soft:#e5efe7;
+    --orange:#d38a4f; --orange-soft:#f8e9db; --warn:#b4623a;
+    --radius:20px; --shadow:0 2px 0 rgba(60,50,40,.06), 0 10px 30px -12px rgba(60,50,40,.18);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    font-size:17px;line-height:1.75;letter-spacing:.02em}
+  button,input,textarea{font:inherit;color:inherit}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 20px 64px}
+  .wrap.wide{max-width:1060px}
+  .hidden{display:none !important}
+
+  /* top bar */
+  .topbar{position:sticky;top:0;z-index:5;background:rgba(250,246,239,.92);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line)}
+  .topbar-in{max-width:1060px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:14px;justify-content:space-between}
+  .brand{font-weight:700;font-size:15px;color:var(--ink);white-space:nowrap}
+  .steps{display:flex;gap:6px;list-style:none;margin:0;padding:0}
+  .steps li{font-size:13px;color:var(--muted);padding:3px 10px;border-radius:999px;background:transparent;white-space:nowrap}
+  .steps li.on{background:var(--blue-soft);color:var(--blue);font-weight:700}
+  .steps li.done{color:var(--green)}
+  @media (max-width:640px){ .steps li:not(.on){display:none} .brand{font-size:14px} }
+
+  .demo-banner{background:var(--orange-soft);color:#8a5530;font-size:14px;text-align:center;padding:6px 12px}
+
+  h1{font-size:clamp(28px,6vw,40px);line-height:1.3;margin:8px 0 6px;letter-spacing:.04em}
+  h2{font-size:clamp(22px,4.6vw,28px);line-height:1.4;margin:0 0 6px}
+  h3{font-size:19px;margin:0}
+  .sub{color:var(--blue);font-weight:500;font-size:clamp(17px,3.6vw,20px);margin:0 0 22px}
+  .lead{color:var(--muted);margin:0 0 24px}
+  .eyebrow{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--orange);margin-bottom:4px}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+  .note{background:var(--green-soft);border-radius:16px;padding:16px 18px;color:#3f5e49;margin:0 0 24px}
+
+  /* hero */
+  .hero-art{margin:4px -4px 18px}
+  .hero-art svg{width:100%;height:auto;display:block}
+
+  /* fields */
+  .field{margin-bottom:18px}
+  .field label{display:block;font-weight:700;margin-bottom:6px}
+  .field .hint{display:block;font-weight:400;color:var(--muted);font-size:14px}
+  .input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;outline:none;transition:border-color .15s}
+  .input:focus{border-color:var(--blue)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:520px){.row2{grid-template-columns:1fr}}
+  .err{color:var(--warn);font-size:14px;margin-top:6px;min-height:0}
+  .err:empty{display:none}
+
+  /* buttons */
+  .btn{appearance:none;border:0;border-radius:999px;padding:13px 26px;font-weight:700;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s, background .15s, opacity .15s}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--blue);color:#fff}
+  .btn-primary:hover{background:#557a98}
+  .btn-ghost{background:transparent;color:var(--muted);padding:13px 16px}
+  .btn-ghost:hover{color:var(--ink)}
+  .btn-orange{background:var(--orange);color:#fff}
+  .btn-orange:hover{background:#c37c43}
+  .btn[disabled]{opacity:.55;cursor:not-allowed}
+  .actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:22px;flex-wrap:wrap}
+  .actions.end{justify-content:flex-end}
+
+  /* story cards */
+  .stories{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+  @media (max-width:760px){.stories{grid-template-columns:1fr}}
+  .story{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+    overflow:hidden;display:flex;flex-direction:column}
+  .story .art{background:#f3ece0}
+  .story .art svg{width:100%;height:auto;display:block}
+  .story .body{padding:18px 22px 22px;display:flex;flex-direction:column;flex:1}
+  .tag{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:4px}
+  .tag b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--blue-soft);color:var(--blue);font-size:13px}
+  .story h3{margin-bottom:8px;line-height:1.45}
+  .story p{margin:0 0 18px;color:#46525a;flex:1}
+  .story .btn{align-self:flex-start}
+
+  /* selected story strip */
+  .chosen{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:center;padding:16px}
+  .chosen .art{border-radius:14px;overflow:hidden;background:#f3ece0}
+  .chosen .art svg{width:100%;height:auto;display:block}
+  .chosen p{margin:6px 0 0;color:#46525a;font-size:16px}
+  @media (max-width:560px){.chosen{grid-template-columns:1fr}}
+
+  /* options */
+  .opts{display:grid;gap:10px;margin:14px 0 0}
+  .opt{position:relative;display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1.5px solid var(--line);
+    border-radius:14px;background:#fff;cursor:pointer;transition:border-color .15s, background .15s}
+  .opt:hover{border-color:#cfc3b1}
+  .opt input{position:absolute;opacity:0;pointer-events:none}
+  .opt .dot{flex:none;width:20px;height:20px;margin-top:4px;border-radius:50%;border:2px solid #b9ad9b;display:grid;place-items:center}
+  .opt input:checked ~ .dot{border-color:var(--blue)}
+  .opt input:checked ~ .dot::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--blue)}
+  .opt:has(input:checked){border-color:var(--blue);background:var(--blue-soft)}
+  .opt input:focus-visible ~ .dot{outline:3px solid rgba(95,134,166,.35);outline-offset:2px}
+  .other-box{margin:8px 0 0 32px}
+
+  /* question */
+  .qhead{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .qicon{flex:none;width:52px;height:52px;border-radius:16px;display:grid;place-items:center}
+  .qicon svg{width:30px;height:30px}
+  .qnum{font-size:13px;color:var(--muted);font-weight:500}
+  .qtitle{font-size:19px;font-weight:700;line-height:1.4}
+  .qtext{font-size:18px;font-weight:500;margin:4px 0 10px;line-height:1.7}
+  .qhint{color:var(--muted);font-size:15px;margin:0 0 14px;padding-left:12px;border-left:3px solid var(--line)}
+  textarea.input{min-height:170px;resize:vertical;line-height:1.7}
+  .dots{display:flex;gap:6px;margin:0 0 16px}
+  .dots span{width:28px;height:6px;border-radius:3px;background:var(--line)}
+  .dots span.on{background:var(--blue)}
+  .dots span.done{background:#b7ccbd}
+  details.recall{margin:0 0 16px;background:#f6f1e8;border-radius:12px;padding:10px 14px;font-size:15px}
+  details.recall summary{cursor:pointer;color:var(--blue);font-weight:500}
+  details.recall p{margin:8px 0 2px;color:#46525a}
+
+  .fade{animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.fade{animation:none}}
+
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(40,35,30,.35);display:grid;place-items:center;padding:20px;z-index:20}
+  .modal .card{max-width:440px}
+  .modal p{margin:0 0 6px}
+
+  .done-art svg{width:min(320px,80%);height:auto;display:block;margin:0 auto 10px}
+  .center{text-align:center}
+  .small{font-size:14px;color:var(--muted)}
+  .resume{background:var(--orange-soft);border-radius:16px;padding:14px 18px;margin-bottom:20px}
+  .resume p{margin:0 0 10px;color:#7a4b28}
+  .resume .btns{display:flex;gap:10px;flex-wrap:wrap}
+  .btn-sm{padding:8px 16px;font-size:15px}
+  .btn-line{background:#fff;border:1.5px solid #dcc3a9;color:#7a4b28}
+
+  /* 教師區 */
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:0 0 16px}
+  .toolbar .field{margin:0}
+  .toolbar label{font-size:13px;font-weight:700;display:block;margin-bottom:4px}
+  .toolbar select,.toolbar .input{padding:8px 10px;border-radius:10px;border:1.5px solid var(--line);background:#fff}
+  .check{display:flex;align-items:center;gap:6px;font-size:15px;padding-bottom:8px}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:8px 14px;font-size:14px;color:var(--muted)}
+  .stat b{display:block;font-size:22px;color:var(--ink)}
+  .tablewrap{overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:14px}
+  table.t{border-collapse:collapse;width:100%;font-size:14px;min-width:760px}
+  table.t th,table.t td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  table.t th{background:#f3ece0;position:sticky;top:0;font-size:13px}
+  table.t tr.r{cursor:pointer} table.t tr.r:hover{background:#f8f3ea}
+  table.t tr.d td{background:#fbf8f2;white-space:pre-wrap;line-height:1.7}
+  .flag{display:inline-block;background:var(--orange-soft);color:#8a5530;border-radius:999px;padding:1px 8px;font-size:12px;margin:1px 2px 1px 0}
+  .ans-q{font-weight:700;color:var(--blue);margin-top:8px}
+  .ans-q:first-child{margin-top:0}
+  .codebox{margin-top:14px;text-align:left}
+  .codebox textarea{width:100%;min-height:90px;font-size:12px;font-family:ui-monospace,monospace}
+  /* 大屏 */
+  .screen{min-height:100vh;background:#26343c;color:#fdfaf3;padding:28px 40px;display:flex;flex-direction:column}
+  .screen-top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .screen-top h2{font-size:clamp(26px,3.4vw,44px);margin:0}
+  .screen select{font-size:24px;padding:6px 14px;border-radius:12px;border:0}
+  .screen .btn-ghost{color:#c9d6de}
+  .big{font-size:clamp(110px,20vw,260px);font-weight:700;line-height:1;color:#f0b98a;text-align:center;margin:30px 0 0}
+  .big-label{text-align:center;font-size:clamp(26px,3.4vw,44px);margin-bottom:26px}
+  .chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:1300px;margin:0 auto}
+  .chips span{background:#3d5160;border-radius:14px;padding:8px 20px;font-size:clamp(24px,2.8vw,38px);font-weight:700}
+  .screen .foot{margin-top:auto;text-align:center;color:#9fb0bb;font-size:20px;padding-top:24px}
+  body.teacher-mode .topbar, body.teacher-mode #demoBanner{display:none}
+</style>
+</head>
+<body>
+
+<!-- 共用手繪濾鏡：讓線條帶一點手繪的抖動感 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2.6"/>
+    </filter>
+  </defs>
+</svg>
+
+<div id="demoBanner" class="demo-banner hidden">本機模式：尚未連接 Google 試算表，作答只會存在這台裝置。</div>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">我的挫折思考小測驗</div>
+    <ol class="steps" id="steps">
+      <li data-s="1">1 選故事</li>
+      <li data-s="2">2 為什麼選它</li>
+      <li data-s="3">3 想一想</li>
+      <li data-s="4">4 送出</li>
+    </ol>
+  </div>
+</header>
+
+<main>
+  <!-- 首頁 -->
+  <section id="v-home" class="wrap fade">
+    <div class="hero-art" id="heroArt"></div>
+    <h1>我的挫折思考小測驗</h1>
+    <p class="sub">生活中難免遇到不如意的事，你會怎麼看待？</p>
+    <p class="note">這裡沒有標準答案，也不是考試。請選一個你最能理解的生活故事，看看自己會怎麼想。放心寫下真實的想法就好。</p>
+
+    <div id="resumeBox" class="resume hidden">
+      <p id="resumeText"></p>
+      <div class="btns">
+        <button class="btn btn-sm btn-orange" id="resumeYes" type="button">繼續作答</button>
+        <button class="btn btn-sm btn-line" id="resumeNo" type="button">不是我的，重新開始</button>
+      </div>
+    </div>
+
+    <form class="card" id="infoForm" novalidate>
+      <h3 style="margin-bottom:4px">開始之前</h3>
+      <p class="small" style="margin:0 0 16px">不需要寫名字，只要填班級和座號（或老師給你的代碼）。</p>
+      <div class="row2">
+        <div class="field">
+          <label for="fClass">班級</label>
+          <input class="input" id="fClass" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="例如：801">
+          <div class="err" id="eClass"></div>
+        </div>
+        <div class="field">
+          <label for="fCode">座號或研究代碼</label>
+          <input class="input" id="fCode" maxlength="20" autocomplete="off" placeholder="例如：12">
+          <div class="err" id="eCode"></div>
+        </div>
+      </div>
+      <p class="small" style="margin:0">大約需要 10–15 分鐘。</p>
+      <div class="actions end">
+        <button class="btn btn-primary" type="submit">開始</button>
+      </div>
+    </form>
+    <p class="center" style="margin-top:22px"><a href="#teacher" class="small" style="color:var(--muted)">我是老師，查看作答資料 →</a></p>
+  </section>
+
+  <!-- 第一階段：選故事 -->
+  <section id="v-choose" class="wrap wide hidden">
+    <span class="eyebrow">第一步</span>
+    <h2>選擇一個生活故事</h2>
+    <p class="lead">看看下面四個故事，選一個你最能理解、或最有感覺的。</p>
+    <div class="stories" id="stories"></div>
+    <div class="actions"><button class="btn btn-ghost" type="button" data-go="home">← 回到首頁</button></div>
+  </section>
+
+  <!-- 第二階段：為什麼選 -->
+  <section id="v-reason" class="wrap hidden">
+    <span class="eyebrow">第二步</span>
+    <h2>你選擇的故事</h2>
+    <div class="card chosen" id="chosenCard" style="margin:14px 0 22px"></div>
+
+    <div class="card">
+      <h3>為什麼你選擇這個故事？</h3>
+      <p class="small" style="margin:2px 0 0">選一個最接近的就好。</p>
+      <div class="opts" id="reasonOpts" role="radiogroup" aria-label="為什麼你選擇這個故事"></div>
+      <div class="err" id="eReason"></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-ghost" type="button" id="reasonBack">← 換一個故事</button>
+      <button class="btn btn-primary" type="button" id="reasonNext">下一步</button>
+    </div>
+  </section>
+
+  <!-- 第三階段：六個問題 -->
+  <section id="v-q" class="wrap hidden">
+    <span class="eyebrow">第三步｜開始探索你的想法</span>
+    <div class="dots" id="qDots" aria-hidden="true"></div>
+    <div id="qCard" class="card"></div>
+    <div class="actions">
+      <button class="btn btn-ghost" type="button" id="qPrev">← 上一題</button>
+      <button class="btn btn-primary" type="button" id="qNext">下一題</button>
+    </div>
+  </section>
+
+  <!-- 第四階段：送出 -->
+  <section id="v-submit" class="wrap hidden">
+    <span class="eyebrow">最後一步</span>
+    <div class="card center" style="padding:32px 24px">
+      <div class="done-art" id="submitArt"></div>
+      <h2>謝謝你認真分享自己的想法！</h2>
+      <p style="color:#46525a;margin:8px auto 0;max-width:520px">每個人面對事情的方式都不一樣，這份問卷沒有標準答案。你的想法，能幫助我們更了解生活中遇到困難時，人們會怎麼思考。</p>
+      <p class="small" style="margin:18px 0 0">送出前，如果想修改，可以按「回去看看」。</p>
+      <div class="err" id="eSubmit" style="margin-top:12px"></div>
+      <div class="codebox hidden" id="codeBox">
+        <p class="small" style="margin:0 0 6px">如果一直送不出去：請按「複製作答碼」，貼給老師（例如用聊天軟體），老師可以替你匯入。</p>
+        <textarea class="input" id="codeText" readonly></textarea>
+        <button class="btn btn-line btn-sm" type="button" id="codeCopy" style="margin-top:8px">複製作答碼</button>
+      </div>
+      <div class="actions" style="justify-content:center">
+        <button class="btn btn-ghost" type="button" id="submitBack">← 回去看看</button>
+        <button class="btn btn-orange" type="button" id="submitBtn" style="padding:15px 40px;font-size:18px">送出</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 完成 -->
+  <section id="v-done" class="wrap hidden">
+    <div class="card center" style="padding:36px 24px">
+      <div class="done-art" id="doneArt"></div>
+      <h2>已經送出了</h2>
+      <p style="color:#46525a;margin:6px 0 0">謝謝你！你可以把畫面拿給老師看，或安靜等待其他同學完成。</p>
+      <div class="actions" style="justify-content:center;margin-top:26px">
+        <button class="btn btn-ghost btn-sm" type="button" id="nextStudent">換下一位同學作答</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 教師區 -->
+  <section id="v-teacher" class="wrap wide hidden">
+    <span class="eyebrow">教師區</span>
+    <h2>作答資料</h2>
+    <div class="card" id="tLogin" style="max-width:460px">
+      <div class="field">
+        <label for="tPw">教師密碼</label>
+        <input class="input" id="tPw" type="password" autocomplete="current-password">
+        <div class="err" id="eLogin"></div>
+      </div>
+      <div class="actions" style="margin-top:6px">
+        <a href="#" class="btn btn-ghost btn-sm" id="tHome1">← 回到學生首頁</a>
+        <button class="btn btn-primary btn-sm" type="button" id="tLoginBtn">登入</button>
+      </div>
+    </div>
+    <div id="tPanel" class="hidden">
+      <div class="toolbar">
+        <div class="field"><label for="tClass">班級</label><select id="tClass"><option value="">全部</option></select></div>
+        <div class="field"><label for="tScen">情境</label><select id="tScen"><option value="">全部</option><option>A</option><option>B</option><option>C</option><option>D</option></select></div>
+        <div class="field"><label for="tCode">座號／代碼</label><input class="input" id="tCode" style="width:90px"></div>
+        <div class="field"><label for="tThr">用時過短門檻（秒）</label><input class="input" id="tThr" type="number" min="0" value="180" style="width:100px"></div>
+        <label class="check"><input type="checkbox" id="tOnlyFlag">只看有提醒標記的</label>
+      </div>
+      <div class="toolbar">
+        <button class="btn btn-primary btn-sm" type="button" id="tReload">重新整理</button>
+        <button class="btn btn-line btn-sm" type="button" id="tCopy">複製到 Excel</button>
+        <button class="btn btn-orange btn-sm" type="button" id="tScreen">開啟大屏</button>
+        <button class="btn btn-ghost btn-sm" type="button" id="tLogout">登出</button>
+        <span class="small" id="tMsg"></span>
+      </div>
+      <div class="stats" id="tStats"></div>
+      <div class="tablewrap"><table class="t" id="tTable"></table></div>
+      <p class="small">點一列可以展開六題完整回答。提醒標記（用時過短、六題都很短）只是提醒，請老師自行確認。</p>
+      <details class="card" style="margin-top:16px">
+        <summary style="cursor:pointer;font-weight:700">匯入學生的作答碼</summary>
+        <p class="small">學生無法送出時，畫面會出現一段作答碼。貼在下面（可以一次貼多段，每段一行）。同一份作答重複匯入不會變成兩筆。</p>
+        <textarea class="input" id="tImport" style="min-height:100px"></textarea>
+        <div class="actions end" style="margin-top:8px"><span class="small" id="tImportMsg"></span><button class="btn btn-primary btn-sm" type="button" id="tImportBtn">匯入</button></div>
+      </details>
+      <p style="margin-top:20px"><a href="#" class="small" id="tHome2" style="color:var(--muted)">← 回到學生首頁</a></p>
+    </div>
+  </section>
+
+  <!-- 大屏 -->
+  <section id="v-screen" class="screen hidden">
+    <div class="screen-top">
+      <h2>我的挫折思考小測驗</h2>
+      <div style="display:flex;gap:12px;align-items:center">
+        <select id="sClass" aria-label="班級"></select>
+        <a href="#teacher" class="btn btn-ghost">離開</a>
+      </div>
+    </div>
+    <div class="big" id="sCount">–</div>
+    <div class="big-label">位同學已完成</div>
+    <div class="chips" id="sCodes"></div>
+    <div class="foot" id="sFoot">每 15 秒自動更新</div>
+  </section>
+</main>
+
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalText">
+  <div class="card">
+    <p id="modalText"></p>
+    <div class="actions end" style="margin-top:16px">
+      <button class="btn btn-ghost btn-sm" type="button" id="modalNo">取消</button>
+      <button class="btn btn-primary btn-sm" type="button" id="modalYes">確定</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js?v=1"></script>
+<script>
+/* 後端網址設定在 config.js（window.MZ_CONFIG.sheetApi）。未設定時為「本機模式」，資料只存在這台裝置。 */
+var CONFIG = {
+  SCRIPT_URL: ((window.MZ_CONFIG||{}).sheetApi||'').trim(),
+  VERSION: 'pretest-v1'
+};
+
+/* ---------- 情境與題目（文字依研究設計，請勿任意更動） ---------- */
+var STORIES = {
+  A: { title:'努力了，成績卻不如預期', name:'小凱',
+       text:'小凱花了不少時間準備考試，成績公布後，卻比自己預期低很多。他覺得自己已經很努力，卻還是沒有得到想要的結果。' },
+  B: { title:'比賽輸了，覺得自己拖累大家', name:'小宇',
+       text:'小宇為了班際球賽練習了好幾個星期，比賽時卻因為幾次失誤，最後輸掉比賽。他覺得自己拖累了全班。' },
+  C: { title:'花了很多心思，作品卻沒有入選', name:'小晴',
+       text:'小晴花了很多時間準備校內作品徵選，原本很期待自己的作品能被選上，結果最後沒有入選。她開始懷疑自己是不是沒有這方面的能力。' },
+  D: { title:'朋友好像漸漸疏遠了', name:'小安',
+       text:'小安原本和幾位同學相處得很好，最近卻發現同學常常沒有找他一起活動。他不知道自己做錯了什麼，開始覺得是不是大家都不喜歡他。' }
+};
+
+var REASONS = [
+  { v:'1', t:'我曾經有過類似的經驗。' },
+  { v:'2', t:'我很能理解故事中人物的感受。' },
+  { v:'3', t:'我覺得這種情況在生活中很常見。' },
+  { v:'4', t:'我只是對這個故事比較有興趣。' },
+  { v:'5', t:'其他原因（可自行填寫）' }
+];
+
+var QUESTIONS = [
+  { title:'如果你是故事中的他', text:'你認為故事中的主角現在可能有什麼感受？為什麼？',
+    hint:'試著想一想，如果是你遇到這件事，可能會有什麼感覺？', icon:'heart', tone:'orange' },
+  { title:'事情為什麼會變成這樣？', text:'除了主角自己想到的原因之外，你認為這件事情還可能有哪些原因？',
+    hint:'試著從不同角度想一想，不一定只有一個原因。', icon:'branch', tone:'blue' },
+  { title:'這個原因會一直存在嗎？', text:'你認為主角這次遇到的困難或失敗原因，以後還會一直存在嗎？為什麼？',
+    hint:'有些事情可能不容易改變，有些事情則可能隨著情況而不同。', icon:'clock', tone:'green' },
+  { title:'哪些事情可以改變？', text:'在這個情境中，哪些事情是主角自己可以改變的？哪些事情不一定能由他控制？',
+    hint:'試著分別想想看，哪些事情可以靠自己調整，哪些事情可能受到其他因素影響。', icon:'hand', tone:'orange' },
+  { title:'換個角度想想', text:'如果你是故事中的主角，你會怎麼看待這次的經驗？為什麼？',
+    hint:'你可以同意主角原本的想法，也可以有不同的看法。', icon:'eye', tone:'blue' },
+  { title:'接下來可以怎麼做？', text:'如果主角之後再次遇到類似的情況，你認為他可以怎麼做？也可以選擇不再嘗試，請說明你的理由。',
+    hint:'沒有一定要選擇哪一種做法，重要的是說明你的想法。', icon:'path', tone:'green' }
+];
+
+/* ---------- 插畫（同一套人物模組與配色，確保四張風格一致） ---------- */
+var C = { ink:'#4a4036', skin:'#f3d5bb', blush:'#eeb8a0', bg:'#f3ece0', wall:'#ebe2d3',
+  blue:'#8eabc4', blueD:'#6f8fab', green:'#9dbba5', greenD:'#7fa08a', orange:'#e3ad7e', orangeD:'#cf9364',
+  paper:'#fffaf2', wood:'#d9b994', woodD:'#c3a17a', hair:'#4f4339', pants:'#6c7e8f' };
+var SW = 'stroke="'+C.ink+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
+
+function arm(d, color){ // 有外框的手臂
+  return '<path d="'+d+'" fill="none" stroke="'+C.ink+'" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>'+
+         '<path d="'+d+'" fill="none" stroke="'+color+'" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>';
+}
+function hand(x,y){ return '<circle cx="'+x+'" cy="'+y+'" r="6.5" fill="'+C.skin+'" '+SW+'/>'; }
+
+/* 人物：o = {x,y,s,shirt,hair:'short'|'spiky'|'bob'|'tied', eyes:'down'|'side'|'up'|'front', arms:'hang'|'desk'|'chin'|'strap'|'none', legs:true/false, flip} */
+function person(o){
+  var s=o.s||1, shirt=o.shirt||C.blue, g='';
+  var flip=o.flip?' scale(-1,1)':'';
+  g+='<g transform="translate('+o.x+','+o.y+') scale('+s+')'+flip+'">';
+  // 腿
+  if(o.legs){
+    g+='<path d="M-15 80 L-16 128 Q-16 133 -11 133 L-4 133 Q0 133 0 128 L1 84 Z" fill="'+(o.pants||C.pants)+'" '+SW+'/>';
+    g+='<path d="M15 80 L16 128 Q16 133 11 133 L4 133 Q0 133 0 128 L-1 84 Z" fill="'+(o.pants||C.pants)+'" '+SW+'/>';
+    g+='<ellipse cx="-10" cy="136" rx="10" ry="5" fill="'+C.ink+'"/><ellipse cx="10" cy="136" rx="10" ry="5" fill="'+C.ink+'"/>';
+  }
+  // 後側手臂（背帶）
+  if(o.arms==='strap'){ g+='<path d="M-14 22 Q-20 50 -22 80" stroke="'+C.orangeD+'" stroke-width="6" fill="none" stroke-linecap="round"/>'; }
+  // 身體
+  g+='<path d="M-26 34 Q-27 22 -12 20 L12 20 Q27 22 26 34 L29 84 Q0 90 -29 84 Z" fill="'+shirt+'" '+SW+'/>';
+  g+='<path d="M-7 21 L0 30 L7 21" fill="none" '+SW+'/>';
+  if(o.number){ g+='<text x="0" y="62" text-anchor="middle" font-size="18" font-weight="700" fill="#fff" font-family="sans-serif">'+o.number+'</text>'; }
+  // 手臂
+  if(o.arms==='hang'){
+    g+=arm('M-24 32 Q-34 56 -30 78',shirt)+hand(-30,82)+arm('M24 32 Q34 56 30 78',shirt)+hand(30,82);
+  } else if(o.arms==='chin'){
+    g+=arm('M-24 32 Q-34 56 -30 78',shirt)+hand(-30,82)+arm('M24 32 Q36 62 20 66 Q6 60 8 24',shirt)+hand(8,17);
+  } else if(o.arms==='strap'){
+    g+=arm('M-24 32 Q-34 56 -30 78',shirt)+hand(-30,82)+arm('M24 32 Q34 50 18 50 Q10 46 12 30',shirt)+hand(12,28);
+    g+='<path d="M14 22 Q20 50 22 80" stroke="'+C.orangeD+'" stroke-width="6" fill="none" stroke-linecap="round"/>';
+  } else if(o.arms==='talk'){
+    g+=arm('M-24 32 Q-34 56 -30 78',shirt)+hand(-30,82)+arm('M24 32 Q40 46 40 30',shirt)+hand(40,26);
+  }
+  // 脖子、頭
+  g+='<rect x="-6" y="12" width="12" height="11" fill="'+C.skin+'" '+SW+'/>';
+  g+='<circle cx="0" cy="-6" r="21" fill="'+C.skin+'" '+SW+'/>';
+  // 頭髮
+  var h=o.hair||'short';
+  if(h==='short') g+='<path d="M-21 -6 Q-23 -30 0 -29 Q22 -30 21 -8 Q14 -18 2 -17 Q-10 -20 -21 -6 Z" fill="'+C.hair+'" '+SW+'/>';
+  if(h==='spiky') g+='<path d="M-21 -5 Q-24 -24 -12 -28 L-8 -34 L-2 -29 L4 -35 L9 -29 L16 -31 Q24 -22 21 -7 Q12 -16 0 -16 Q-12 -17 -21 -5 Z" fill="'+C.hair+'" '+SW+'/>';
+  if(h==='bob') g+='<path d="M-23 10 Q-28 -30 0 -29 Q28 -30 23 10 Q20 12 17 8 L16 -8 Q6 -14 -6 -17 Q-14 -10 -16 -6 L-17 8 Q-20 12 -23 10 Z" fill="'+C.hair+'" '+SW+'/>';
+  if(h==='tied') g+='<circle cx="18" cy="-24" r="8" fill="'+C.hair+'" '+SW+'/><path d="M-21 -4 Q-24 -30 0 -29 Q22 -30 21 -6 Q10 -18 -4 -17 Q-14 -14 -21 -4 Z" fill="'+C.hair+'" '+SW+'/>';
+  // 表情
+  var e=o.eyes||'front', ey='';
+  if(e==='down') ey='<path d="M-11 -3 Q-7 0 -3 -3 M3 -3 Q7 0 11 -3" fill="none" '+SW+'/>';
+  if(e==='front') ey='<circle cx="-7" cy="-4" r="2.3" fill="'+C.ink+'"/><circle cx="7" cy="-4" r="2.3" fill="'+C.ink+'"/>';
+  if(e==='side') ey='<circle cx="-4" cy="-4" r="2.3" fill="'+C.ink+'"/><circle cx="10" cy="-4" r="2.3" fill="'+C.ink+'"/>';
+  if(e==='up') ey='<circle cx="-5" cy="-6" r="2.3" fill="'+C.ink+'"/><circle cx="9" cy="-6" r="2.3" fill="'+C.ink+'"/>';
+  g+=ey;
+  if(o.mood==='low') g+='<path d="M-12 -11 L-4 -13 M4 -13 L12 -11" fill="none" stroke="'+C.ink+'" stroke-width="1.8" stroke-linecap="round"/>';
+  if(o.mood==='happy') g+='<path d="M-5 6 Q0 10 5 6" fill="none" '+SW+'/>';
+  else if(o.mood==='calm') g+='<path d="M-4 7 L4 7" fill="none" '+SW+'/>';
+  else g+='<path d="M-5 8 Q0 5 5 8" fill="none" '+SW+'/>';
+  g+='<ellipse cx="-12" cy="3" rx="4" ry="2.4" fill="'+C.blush+'" opacity=".6"/><ellipse cx="12" cy="3" rx="4" ry="2.4" fill="'+C.blush+'" opacity=".6"/>';
+  g+='</g>';
+  return g;
+}
+
+function frame(inner, bgBlob){
+  return '<svg viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg" role="img">'+
+    '<rect width="400" height="250" fill="'+C.bg+'"/>'+
+    (bgBlob||'')+
+    '<g filter="url(#sketch)">'+inner+'</g></svg>';
+}
+
+function sceneA(){ // 書桌前看考卷
+  var s='';
+  s+='<rect x="0" y="0" width="400" height="190" fill="'+C.wall+'"/>';
+  s+='<rect x="236" y="26" width="120" height="86" rx="6" fill="#dfe9ef" '+SW+'/><path d="M296 26 L296 112 M236 69 L356 69" '+SW+' fill="none"/>';
+  s+='<path d="M232 22 Q246 70 230 120" fill="none" stroke="'+C.green+'" stroke-width="10" stroke-linecap="round"/>';
+  s+='<rect x="44" y="40" width="60" height="44" rx="4" fill="'+C.paper+'" '+SW+'/><path d="M54 54 L94 54 M54 64 L86 64 M54 74 L80 74" stroke="#c9bba6" stroke-width="2" stroke-linecap="round"/>';
+  s+=person({x:186,y:96,s:1,shirt:C.blue,hair:'short',eyes:'down',mood:'low',arms:'none'});
+  // 書桌
+  s+='<rect x="40" y="172" width="320" height="16" rx="4" fill="'+C.wood+'" '+SW+'/>';
+  s+='<rect x="54" y="188" width="14" height="62" fill="'+C.woodD+'" '+SW+'/><rect x="332" y="188" width="14" height="62" fill="'+C.woodD+'" '+SW+'/>';
+  // 檯燈
+  s+='<path d="M86 172 L86 150 L104 118" fill="none" '+SW+'/><path d="M92 106 L122 112 L112 132 Z" fill="'+C.orange+'" '+SW+'/><ellipse cx="86" cy="171" rx="14" ry="4" fill="'+C.ink+'"/>';
+  // 書本
+  s+='<rect x="276" y="150" width="58" height="11" rx="2" fill="'+C.green+'" '+SW+'/><rect x="282" y="139" width="50" height="11" rx="2" fill="'+C.orange+'" '+SW+'/><rect x="272" y="161" width="64" height="11" rx="2" fill="'+C.blueD+'" '+SW+'/>';
+  // 考卷與手
+  s+='<path d="M150 150 L226 146 L230 176 L152 178 Z" fill="'+C.paper+'" '+SW+'/>';
+  s+='<path d="M162 156 L212 154 M162 164 L218 162 M162 171 L200 170" stroke="#c9bba6" stroke-width="2" stroke-linecap="round"/>';
+  s+=arm('M160 126 Q148 150 156 166', C.blue)+hand(156,168)+arm('M212 126 Q228 150 222 164', C.blue)+hand(222,166);
+  return frame(s);
+}
+
+function sceneB(){ // 球場邊
+  var s='';
+  s+='<rect x="0" y="0" width="400" height="120" fill="#e3ebe6"/>';
+  s+='<path d="M0 118 L400 118 L400 250 L0 250 Z" fill="'+C.green+'"/>';
+  s+='<path d="M0 150 L400 136" stroke="#f5f1e8" stroke-width="3" fill="none" opacity=".9"/>';
+  s+='<path d="M210 250 Q300 160 400 170" stroke="#f5f1e8" stroke-width="3" fill="none" opacity=".9"/>';
+  // 籃框
+  s+='<path d="M356 118 L356 40" '+SW+' fill="none"/><rect x="330" y="28" width="52" height="32" rx="3" fill="'+C.paper+'" '+SW+'/><path d="M346 62 L366 62 L362 76 L350 76 Z" fill="none" stroke="'+C.orangeD+'" stroke-width="2.4"/>';
+  // 遠處隊友（較小）
+  s+=person({x:244,y:84,s:.46,shirt:C.orange,hair:'short',eyes:'side',mood:'calm',arms:'hang',legs:true,number:''});
+  s+=person({x:276,y:80,s:.46,shirt:C.orange,hair:'spiky',eyes:'front',mood:'calm',arms:'talk',legs:true,flip:true});
+  s+=person({x:304,y:86,s:.46,shirt:C.orange,hair:'tied',eyes:'side',mood:'calm',arms:'hang',legs:true});
+  // 主角
+  s+=person({x:110,y:96,s:.86,shirt:C.orange,hair:'spiky',eyes:'down',mood:'low',arms:'hang',legs:true,number:'7'});
+  // 球
+  s+='<circle cx="170" cy="222" r="15" fill="'+C.orangeD+'" '+SW+'/><path d="M155 222 L185 222 M170 207 Q162 222 170 237 M170 207 Q178 222 170 237" fill="none" stroke="'+C.ink+'" stroke-width="1.8"/>';
+  // 長椅
+  s+='<rect x="18" y="200" width="56" height="9" rx="2" fill="'+C.wood+'" '+SW+'/><path d="M24 209 L24 228 M68 209 L68 228" '+SW+'/>';
+  s+='<path d="M36 190 L36 200 L50 200 L50 192 Z" fill="'+C.blue+'" '+SW+'/>';
+  return frame(s);
+}
+
+function sceneC(){ // 作品與公告
+  var s='';
+  s+='<rect x="0" y="0" width="400" height="190" fill="'+C.wall+'"/>';
+  // 公告欄
+  s+='<rect x="244" y="18" width="128" height="96" rx="6" fill="'+C.woodD+'" '+SW+'/><rect x="252" y="26" width="112" height="80" rx="3" fill="#e8d7bf"/>';
+  s+='<path d="M262 32 L328 30 L330 100 L264 102 Z" fill="'+C.paper+'" '+SW+'/>';
+  s+='<text x="296" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="'+C.ink+'" font-family="Noto Sans TC,sans-serif">徵選結果</text>';
+  s+='<path d="M274 60 L318 59 M274 70 L314 69 M274 80 L318 79 M274 90 L306 89" stroke="#c9bba6" stroke-width="2" stroke-linecap="round"/>';
+  s+='<circle cx="296" cy="32" r="4" fill="'+C.orange+'" '+SW+'/>';
+  s+='<path d="M338 40 L356 42 L354 62 L336 60 Z" fill="'+C.blue+'" opacity=".8" '+SW+'/>';
+  // 人物（托腮）
+  s+=person({x:132,y:96,s:1,shirt:C.green,hair:'bob',eyes:'up',mood:'calm',arms:'chin'});
+  // 桌子
+  s+='<rect x="40" y="172" width="320" height="16" rx="4" fill="'+C.wood+'" '+SW+'/>';
+  s+='<rect x="54" y="188" width="14" height="62" fill="'+C.woodD+'" '+SW+'/><rect x="332" y="188" width="14" height="62" fill="'+C.woodD+'" '+SW+'/>';
+  s+=arm('M108 126 Q98 152 112 164', C.green)+hand(114,166);
+  // 作品：立在桌上的畫
+  s+='<path d="M216 172 L232 116 L300 116 L316 172" fill="none" '+SW+'/>';
+  s+='<rect x="222" y="104" width="88" height="64" rx="3" fill="'+C.paper+'" '+SW+'/>';
+  s+='<path d="M230 158 L254 128 L270 146 L282 134 L302 158 Z" fill="'+C.green+'" '+SW+'/><circle cx="290" cy="120" r="7" fill="'+C.orange+'" '+SW+'/>';
+  // 筆筒
+  s+='<rect x="70" y="146" width="22" height="26" rx="3" fill="'+C.blue+'" '+SW+'/><path d="M76 146 L72 130 M82 146 L84 126 M88 146 L94 134" '+SW+' fill="none"/>';
+  return frame(s);
+}
+
+function sceneD(){ // 走廊
+  var s='';
+  s+='<rect x="0" y="0" width="400" height="160" fill="'+C.wall+'"/>';
+  s+='<path d="M0 160 L400 160 L400 250 L0 250 Z" fill="#e2d6c3"/>';
+  s+='<path d="M0 200 L400 186 M0 236 L400 214" stroke="#d4c6b0" stroke-width="2" fill="none"/>';
+  // 窗戶
+  for(var i=0;i<3;i++){ var x=30+i*124; s+='<rect x="'+x+'" y="26" width="92" height="66" rx="4" fill="#dfe9ef" '+SW+'/><path d="M'+(x+46)+' 26 L'+(x+46)+' 92" '+SW+'/>'; }
+  s+='<path d="M0 108 L400 108" stroke="'+C.green+'" stroke-width="8" opacity=".7"/>';
+  // 遠處同學（彼此交談）
+  s+=person({x:258,y:104,s:.5,shirt:C.blue,hair:'short',eyes:'side',mood:'happy',arms:'hang',legs:true});
+  s+=person({x:290,y:100,s:.5,shirt:C.orange,hair:'tied',eyes:'front',mood:'happy',arms:'talk',legs:true,flip:true});
+  s+=person({x:322,y:106,s:.5,shirt:C.green,hair:'spiky',eyes:'side',mood:'happy',arms:'hang',legs:true,flip:true});
+  s+='<path d="M268 52 Q268 42 282 42 L300 42 Q312 42 312 52 Q312 62 300 62 L288 62 L282 70 L282 62 Q268 62 268 52 Z" fill="'+C.paper+'" '+SW+'/><circle cx="282" cy="52" r="2" fill="'+C.ink+'"/><circle cx="290" cy="52" r="2" fill="'+C.ink+'"/><circle cx="298" cy="52" r="2" fill="'+C.ink+'"/>';
+  // 主角
+  s+=person({x:96,y:100,s:.86,shirt:C.blueD,hair:'short',eyes:'side',mood:'low',arms:'strap',legs:true});
+  return frame(s);
+}
+
+function heroArt(){
+  var s='';
+  s+='<rect x="0" y="0" width="400" height="250" fill="'+C.bg+'"/>';
+  return '<svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+
+    '<path d="M40 150 Q160 60 320 110 T610 90" fill="none" stroke="'+C.line+'" stroke-width="2"/>'+
+    '<g filter="url(#sketch)">'+
+    '<circle cx="520" cy="56" r="26" fill="'+C.orange+'" opacity=".55"/>'+
+    '<path d="M0 200 Q120 150 240 176 T460 166 T640 180 L640 200 Z" fill="'+C.green+'" opacity=".55"/>'+
+    '<path d="M0 200 Q160 172 320 190 T640 190 L640 200 Z" fill="'+C.blue+'" opacity=".5"/>'+
+    person({x:150,y:84,s:.62,shirt:C.blue,hair:'short',eyes:'side',mood:'calm',arms:'hang',legs:true})+
+    person({x:230,y:90,s:.62,shirt:C.orange,hair:'spiky',eyes:'front',mood:'calm',arms:'hang',legs:true})+
+    person({x:390,y:86,s:.62,shirt:C.green,hair:'bob',eyes:'front',mood:'calm',arms:'strap',legs:true,flip:true})+
+    person({x:470,y:90,s:.62,shirt:C.blueD,hair:'tied',eyes:'side',mood:'calm',arms:'hang',legs:true,flip:true})+
+    '<path d="M300 40 Q300 26 316 26 L338 26 Q352 26 352 40 Q352 54 338 54 L326 54 L318 64 L318 54 Q300 54 300 40 Z" fill="'+C.paper+'" '+SW+'/>'+
+    '<text x="326" y="46" text-anchor="middle" font-size="18" font-weight="700" fill="'+C.ink+'" font-family="sans-serif">?</text>'+
+    '</g></svg>';
+}
+C.line = '#d9cdb9';
+
+function doneArtSvg(){
+  return '<svg viewBox="0 0 320 170" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g filter="url(#sketch)">'+
+    '<ellipse cx="160" cy="150" rx="120" ry="14" fill="'+C.green+'" opacity=".45"/>'+
+    '<path d="M120 40 L210 34 L216 140 L124 146 Z" fill="'+C.paper+'" '+SW+'/>'+
+    '<path d="M138 64 L196 60 M138 80 L198 76 M138 96 L190 93 M138 112 L180 110" stroke="#c9bba6" stroke-width="2.4" stroke-linecap="round"/>'+
+    '<path d="M196 118 Q230 90 262 70" fill="none" stroke="'+C.orange+'" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>'+
+    '<path d="M250 62 L278 52 L268 80 L262 70 Z" fill="'+C.blue+'" '+SW+'/>'+
+    '<circle cx="80" cy="60" r="6" fill="'+C.orange+'" opacity=".7"/><circle cx="252" cy="126" r="5" fill="'+C.blue+'" opacity=".7"/><circle cx="96" cy="118" r="4" fill="'+C.green+'"/>'+
+    '</g></svg>';
+}
+
+var ICONS = {
+  heart:'<path d="M15 26 C6 19 3 14 3 10 C3 6 6 4 9 4 C12 4 14 6 15 8 C16 6 18 4 21 4 C24 4 27 6 27 10 C27 14 24 19 15 26 Z"/>',
+  branch:'<circle cx="7" cy="23" r="3"/><circle cx="23" cy="7" r="3"/><circle cx="23" cy="23" r="3"/><path d="M7 20 L7 12 Q7 8 11 8 L20 7 M10 15 Q16 15 20 21"/>',
+  clock:'<circle cx="15" cy="15" r="11"/><path d="M15 9 L15 15 L20 18"/>',
+  hand:'<path d="M10 27 Q5 22 5 16 L5 11 Q5 9 7 9 Q9 9 9 11 L9 15 L9 6 Q9 4 11 4 Q13 4 13 6 L13 14 L13 4 Q13 2 15 2 Q17 2 17 4 L17 14 L17 6 Q17 4 19 4 Q21 4 21 6 L21 17 Q21 25 16 27 Z"/>',
+  eye:'<path d="M3 15 Q15 4 27 15 Q15 26 3 15 Z"/><circle cx="15" cy="15" r="4"/>',
+  path:'<path d="M5 26 Q5 18 13 18 L17 18 Q25 18 25 10 L25 5"/><path d="M21 8 L25 4 L29 8"/><circle cx="5" cy="26" r="2"/>'
+};
+var TONES = { orange:['#f8e9db','#c37c43'], blue:['#e4edf3','#557a98'], green:['#e5efe7','#5d8a6c'] };
+function iconSvg(name,tone){
+  var t=TONES[tone];
+  return '<div class="qicon" style="background:'+t[0]+'"><svg viewBox="0 0 30 30" fill="none" stroke="'+t[1]+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+ICONS[name]+'</svg></div>';
+}
+
+var ART = { A:sceneA, B:sceneB, C:sceneC, D:sceneD };
+
+/* ---------- 狀態 ---------- */
+var DRAFT_KEY = 'frustration-pretest-draft-v1';
+var state = freshState();
+var qIndex = 0;
+var submitting = false;
+
+function freshState(){
+  return { submissionId: uid(), className:'', studentCode:'', scenario:'', reason:'', reasonOther:'',
+           answers:['','','','','',''], startedAt:'', view:'home', qIndex:0 };
+}
+function uid(){
+  try{ if(window.crypto && crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+  return 'id-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+}
+function saveDraft(){ try{ state.qIndex=qIndex; localStorage.setItem(DRAFT_KEY, JSON.stringify(state)); }catch(e){} }
+function loadDraft(){ try{ var s=localStorage.getItem(DRAFT_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+/* ---------- 畫面切換 ---------- */
+var VIEWS = ['home','choose','reason','q','submit','done','teacher','screen'];
+var STEP_OF = { home:0, choose:1, reason:2, q:3, submit:4, done:5, teacher:0, screen:0 };
+function show(v, noSave){
+  VIEWS.forEach(function(n){ $('v-'+n).classList.toggle('hidden', n!==v); });
+  var el=$('v-'+v); el.classList.remove('fade'); void el.offsetWidth; el.classList.add('fade');
+  var st=STEP_OF[v];
+  Array.prototype.forEach.call($('steps').children,function(li){
+    var n=+li.getAttribute('data-s');
+    li.classList.toggle('on', n===st); li.classList.toggle('done', n<st);
+  });
+  $('steps').style.visibility = (v==='home'||v==='done')?'hidden':'visible';
+  var tm=(v==='teacher'||v==='screen');
+  document.body.classList.toggle('teacher-mode', tm);
+  if(tm) noSave=true; else state.view=v;
+  if(v!=='done' && !noSave) saveDraft();
+  window.scrollTo(0,0);
+}
+
+/* ---------- 首頁 ---------- */
+$('heroArt').innerHTML = heroArt();
+$('infoForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var cls=$('fClass').value.trim(), code=$('fCode').value.trim(), ok=true;
+  $('eClass').textContent = cls?'':'請填寫班級。'; if(!cls) ok=false;
+  $('eCode').textContent = code?'':'請填寫座號或研究代碼。'; if(!code) ok=false;
+  if(!ok) return;
+  state.className=cls; state.studentCode=code;
+  if(!state.startedAt) state.startedAt=new Date().toISOString();
+  show('choose');
+});
+
+/* ---------- 選故事 ---------- */
+function renderStories(){
+  var html='';
+  ['A','B','C','D'].forEach(function(k){
+    var s=STORIES[k];
+    html+='<article class="story"><div class="art">'+ART[k]()+'</div><div class="body">'+
+      '<div class="tag"><b>'+k+'</b>人物：'+s.name+'</div>'+
+      '<h3>'+s.title+'</h3><p>'+s.text+'</p>'+
+      '<button class="btn btn-primary" type="button" data-pick="'+k+'">選擇這個故事</button></div></article>';
+  });
+  $('stories').innerHTML=html;
+}
+renderStories();
+$('stories').addEventListener('click', function(e){
+  var b=e.target.closest('[data-pick]'); if(!b) return;
+  state.scenario=b.getAttribute('data-pick');
+  renderReason(); show('reason');
+});
+document.addEventListener('click', function(e){
+  var g=e.target.closest('[data-go]'); if(g) show(g.getAttribute('data-go'));
+});
+
+/* ---------- 選擇原因 ---------- */
+function renderChosen(){
+  var s=STORIES[state.scenario];
+  $('chosenCard').innerHTML='<div class="art">'+ART[state.scenario]()+'</div><div>'+
+    '<div class="tag"><b>'+state.scenario+'</b>人物：'+s.name+'</div><h3>'+s.title+'</h3><p>'+s.text+'</p></div>';
+}
+function renderReason(){
+  renderChosen();
+  var html='';
+  REASONS.forEach(function(r){
+    html+='<label class="opt"><input type="radio" name="reason" value="'+r.v+'"'+(state.reason===r.v?' checked':'')+'><span class="dot"></span><span>'+r.t+'</span></label>';
+    if(r.v==='5') html+='<div class="other-box'+(state.reason==='5'?'':' hidden')+'" id="otherBox"><input class="input" id="fOther" maxlength="300" placeholder="想寫的話，可以在這裡說明" value="'+esc(state.reasonOther)+'"></div>';
+  });
+  $('reasonOpts').innerHTML=html;
+  $('eReason').textContent='';
+}
+$('reasonOpts').addEventListener('change', function(e){
+  if(e.target.name==='reason'){
+    state.reason=e.target.value;
+    $('otherBox').classList.toggle('hidden', state.reason!=='5');
+    if(state.reason==='5') $('fOther').focus();
+    $('eReason').textContent=''; saveDraft();
+  }
+});
+$('reasonOpts').addEventListener('input', function(e){ if(e.target.id==='fOther'){ state.reasonOther=e.target.value; saveDraft(); } });
+$('reasonNext').addEventListener('click', function(){
+  if(!state.reason){ $('eReason').textContent='請選一個選項。'; return; }
+  if(state.reason==='5' && !state.reasonOther.trim()){ $('eReason').textContent='選了「其他原因」的話，請簡單寫一下原因。'; return; }
+  qIndex=0; renderQ(); show('q');
+});
+$('reasonBack').addEventListener('click', function(){
+  var any=state.answers.some(function(a){return a.trim();});
+  if(any){
+    confirmBox('換一個故事的話，已經寫好的回答會被清空。確定要換嗎？', function(){
+      state.answers=['','','','','','']; state.reason=''; state.reasonOther=''; show('choose');
+    });
+  } else { show('choose'); }
+});
+
+/* ---------- 六個問題 ---------- */
+function renderQ(){
+  var q=QUESTIONS[qIndex], s=STORIES[state.scenario];
+  var dots=''; for(var i=0;i<6;i++) dots+='<span class="'+(i===qIndex?'on':(state.answers[i].trim()?'done':''))+'"></span>';
+  $('qDots').innerHTML=dots;
+  $('qCard').innerHTML=
+    '<div class="qhead">'+iconSvg(q.icon,q.tone)+'<div><div class="qnum">第 '+(qIndex+1)+' 題 / 共 6 題</div><div class="qtitle">'+q.title+'</div></div></div>'+
+    '<details class="recall"><summary>再看一次故事：'+s.title+'</summary><p>'+s.text+'</p></details>'+
+    '<p class="qtext">'+q.text+'</p>'+
+    '<p class="qhint">'+q.hint+'</p>'+
+    '<label for="ans" class="hidden">你的回答</label>'+
+    '<textarea class="input" id="ans" maxlength="3000" placeholder="在這裡寫下你的想法">'+esc(state.answers[qIndex])+'</textarea>'+
+    '<div class="err" id="eAns"></div>';
+  $('qPrev').textContent = qIndex===0 ? '← 回到上一步' : '← 上一題';
+  $('qNext').textContent = qIndex===5 ? '完成，準備送出' : '下一題';
+  $('ans').addEventListener('input', function(e){ state.answers[qIndex]=e.target.value; $('eAns').textContent=''; saveDraft(); });
+}
+$('qNext').addEventListener('click', function(){
+  state.answers[qIndex]=$('ans').value;
+  if(!state.answers[qIndex].trim()){ $('eAns').textContent='這題還沒有寫喔。寫下你現在想到的就可以。'; $('ans').focus(); return; }
+  if(qIndex<5){ qIndex++; renderQ(); saveDraft(); window.scrollTo(0,0); }
+  else { $('eSubmit').textContent=''; show('submit'); }
+});
+$('qPrev').addEventListener('click', function(){
+  state.answers[qIndex]=$('ans').value;
+  if(qIndex>0){ qIndex--; renderQ(); saveDraft(); window.scrollTo(0,0); }
+  else { renderReason(); show('reason'); }
+});
+
+/* ---------- 送出 ---------- */
+$('submitArt').innerHTML=doneArtSvg();
+$('doneArt').innerHTML=doneArtSvg();
+$('submitBack').addEventListener('click', function(){ qIndex=5; renderQ(); show('q'); });
+
+function validateAll(){
+  if(!state.className.trim()||!state.studentCode.trim()) return '班級或座號還沒填寫，請回到首頁補上。';
+  if(!STORIES[state.scenario]) return '還沒有選擇故事。';
+  if(!state.reason) return '還沒有選擇「為什麼選這個故事」。';
+  if(state.reason==='5' && !state.reasonOther.trim()) return '「其他原因」還沒有寫。';
+  for(var i=0;i<6;i++){ if(!state.answers[i].trim()) return '第 '+(i+1)+' 題還沒有寫。'; }
+  return '';
+}
+function buildPayload(){
+  var r=REASONS.filter(function(x){return x.v===state.reason;})[0];
+  return {
+    submissionId: state.submissionId, version: CONFIG.VERSION,
+    className: state.className.trim(), studentCode: state.studentCode.trim(),
+    scenario: state.scenario, scenarioTitle: STORIES[state.scenario].title,
+    reasonCode: state.reason, reasonText: r ? r.t : '', reasonOther: state.reason==='5' ? state.reasonOther : '',
+    q1: state.answers[0], q2: state.answers[1], q3: state.answers[2],
+    q4: state.answers[3], q5: state.answers[4], q6: state.answers[5],
+    startedAt: state.startedAt, clientSubmittedAt: new Date().toISOString(),
+    device: deviceType()
+  };
+}
+function deviceType(){
+  var ua=navigator.userAgent||'';
+  if(/iPad|Tablet/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints>1)) return '平板';
+  if(/Mobi|Android|iPhone/i.test(ua)) return '手機';
+  return '電腦';
+}
+/* ---------- 與後端溝通（text/plain 避免 CORS 預檢） ---------- */
+var LOCAL_KEY='frustration-pretest-local-v1';
+function localAll(){ try{ return JSON.parse(localStorage.getItem(LOCAL_KEY)||'[]'); }catch(e){ return []; } }
+function localSave(p){
+  var all=localAll();
+  if(all.some(function(x){return x.submissionId===p.submissionId;})) return { ok:true, duplicate:true };
+  p=Object.assign({}, p, { serverTime:new Date().toISOString() }); all.push(p);
+  try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(all)); }catch(e){ return { ok:false, error:'本機儲存失敗' }; }
+  return { ok:true, duplicate:false };
+}
+function localRows(){
+  return localAll().map(function(p){
+    var st=new Date(p.startedAt), en=new Date(p.serverTime);
+    return { time:fmtTime(en), className:p.className, code:p.studentCode, scenario:p.scenario, scenarioTitle:p.scenarioTitle,
+      reasonCode:p.reasonCode, reason:p.reasonText, reasonOther:p.reasonOther, q1:p.q1,q2:p.q2,q3:p.q3,q4:p.q4,q5:p.q5,q6:p.q6,
+      startedAt:fmtTime(st), seconds:Math.round((en-st)/1000), device:p.device, id:p.submissionId, note:'' };
+  });
+}
+function fmtTime(d){ if(!(d instanceof Date)||isNaN(d)) return ''; function z(n){return (n<10?'0':'')+n;}
+  return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes())+':'+z(d.getSeconds()); }
+function api(action, body){
+  body=Object.assign({ action:action }, body||{});
+  if(!CONFIG.SCRIPT_URL){
+    return new Promise(function(res){ setTimeout(function(){
+      if(action==='save') res(localSave(body.data));
+      else if(action==='list') res({ ok:true, local:true, rows:localRows() });
+      else if(action==='progress'){ var c={}; localRows().forEach(function(r){ (c[r.className]=c[r.className]||[]); if(c[r.className].indexOf(r.code)<0) c[r.className].push(r.code); }); res({ ok:true, classes:c }); }
+      else res({ ok:false, error:'未知動作' });
+    }, 400); });
+  }
+  return fetch(CONFIG.SCRIPT_URL,{ method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(body) })
+    .then(function(r){ return r.json(); });
+}
+function sendToServer(payload){ return api('save', { data:payload }); }
+function toCode(p){ return 'PT1:'+btoa(unescape(encodeURIComponent(JSON.stringify(p)))); }
+function fromCode(c){ return JSON.parse(decodeURIComponent(escape(atob(c.trim().replace(/^PT1:/,''))))); }
+function copyText(text, okEl){
+  function fallback(){ var t=document.createElement('textarea'); t.value=text; document.body.appendChild(t); t.select();
+    try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(t); if(okEl) okEl.textContent='已複製'; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ if(okEl) okEl.textContent='已複製'; }, fallback);
+  } else fallback();
+}
+$('submitBtn').addEventListener('click', function(){
+  if(submitting) return;
+  var msg=validateAll();
+  if(msg){ $('eSubmit').textContent=msg; return; }
+  submitting=true;
+  var btn=$('submitBtn'); btn.disabled=true; btn.textContent='送出中…';
+  $('submitBack').disabled=true; $('eSubmit').textContent='';
+  sendToServer(buildPayload()).then(function(res){
+    if(res && res.ok){
+      clearDraft(); $('codeBox').classList.add('hidden'); show('done');
+    } else {
+      throw new Error((res && res.error) || '未知錯誤');
+    }
+  }).catch(function(err){
+    $('eSubmit').textContent='送出沒有成功，可能是網路不穩。你的回答都還在，請再按一次「送出」；如果一直不行，請告訴老師。';
+    $('codeText').value=toCode(buildPayload()); $('codeBox').classList.remove('hidden');
+    console.error(err);
+  }).then(function(){
+    submitting=false; btn.disabled=false; btn.textContent='送出'; $('submitBack').disabled=false;
+  });
+});
+
+$('nextStudent').addEventListener('click', function(){
+  clearDraft(); state=freshState(); qIndex=0;
+  $('fClass').value=''; $('fCode').value='';
+  show('home');
+});
+
+/* ---------- 自訂確認視窗 ---------- */
+var modalCb=null;
+function confirmBox(text, cb){ $('modalText').textContent=text; modalCb=cb; $('modal').classList.remove('hidden'); $('modalYes').focus(); }
+$('modalNo').addEventListener('click', function(){ $('modal').classList.add('hidden'); modalCb=null; });
+$('modalYes').addEventListener('click', function(){ $('modal').classList.add('hidden'); var f=modalCb; modalCb=null; if(f) f(); });
+
+$('codeCopy').addEventListener('click', function(){ copyText($('codeText').value, $('eSubmit')); });
+
+/* ---------- 教師區 ---------- */
+var PW_KEY='frustration-pretest-pw', tRows=[], tOpen={}, sTimer=null;
+function getPw(){ try{ return sessionStorage.getItem(PW_KEY)||''; }catch(e){ return ''; } }
+function setPw(v){ try{ if(v) sessionStorage.setItem(PW_KEY,v); else sessionStorage.removeItem(PW_KEY); }catch(e){} }
+var QLABEL=['Q1 主角感受','Q2 其他可能原因','Q3 原因是否持續','Q4 可改變與不可控制','Q5 如何看待經驗','Q6 接下來的做法'];
+
+function flagsOf(r){
+  var f=[], thr=+$('tThr').value||0;
+  if(r.seconds!=='' && r.seconds!=null && +r.seconds<thr) f.push('用時過短');
+  var short=true; for(var i=1;i<=6;i++){ if(String(r['q'+i]||'').replace(/\s/g,'').length>=3){ short=false; break; } }
+  if(short) f.push('六題都很短');
+  return f;
+}
+function filtered(){
+  var c=$('tClass').value, sc=$('tScen').value, code=$('tCode').value.trim(), only=$('tOnlyFlag').checked;
+  return tRows.filter(function(r){
+    if(c && String(r.className)!==c) return false;
+    if(sc && r.scenario!==sc) return false;
+    if(code && String(r.code)!==code) return false;
+    if(only && !flagsOf(r).length) return false;
+    return true;
+  });
+}
+function secText(s){ if(s===''||s==null) return ''; s=+s; return Math.floor(s/60)+' 分 '+(s%60)+' 秒'; }
+function renderTeacher(){
+  var rows=filtered(), cnt={A:0,B:0,C:0,D:0}, fl=0;
+  rows.forEach(function(r){ cnt[r.scenario]=(cnt[r.scenario]||0)+1; if(flagsOf(r).length) fl++; });
+  $('tStats').innerHTML='<div class="stat"><b>'+rows.length+'</b>筆</div>'+
+    ['A','B','C','D'].map(function(k){return '<div class="stat"><b>'+cnt[k]+'</b>情境 '+k+'</div>';}).join('')+
+    '<div class="stat"><b>'+fl+'</b>有提醒標記</div>';
+  var h='<thead><tr><th>提交時間</th><th>班級</th><th>座號／代碼</th><th>情境</th><th>選擇原因</th><th>用時</th><th>裝置</th><th>提醒</th></tr></thead><tbody>';
+  if(!rows.length) h+='<tr><td colspan="8" class="small">目前沒有資料。</td></tr>';
+  rows.forEach(function(r){
+    var f=flagsOf(r);
+    h+='<tr class="r" data-id="'+esc(r.id)+'"><td>'+esc(r.time)+'</td><td>'+esc(r.className)+'</td><td>'+esc(r.code)+'</td><td>'+esc(r.scenario)+'</td>'+
+       '<td>'+esc(r.reasonCode)+'. '+esc(r.reason)+(r.reasonOther?'<br><span class="small">'+esc(r.reasonOther)+'</span>':'')+'</td>'+
+       '<td>'+secText(r.seconds)+'</td><td>'+esc(r.device)+'</td><td>'+f.map(function(x){return '<span class="flag">'+x+'</span>';}).join('')+(r.note?'<span class="flag">'+esc(r.note)+'</span>':'')+'</td></tr>';
+    if(tOpen[r.id]){
+      h+='<tr class="d"><td colspan="8">'+QLABEL.map(function(l,i){ return '<div class="ans-q">'+l+'</div>'+esc(r['q'+(i+1)]); }).join('')+'</td></tr>';
+    }
+  });
+  $('tTable').innerHTML=h+'</tbody>';
+}
+function fillClassSelect(sel, list, keepAll){
+  var cur=sel.value; sel.innerHTML=(keepAll?'<option value="">全部</option>':'')+list.map(function(c){return '<option>'+esc(c)+'</option>';}).join('');
+  if(list.indexOf(cur)>=0 || (keepAll && cur==='')) sel.value=cur;
+}
+function loadTeacher(){
+  $('tMsg').textContent='讀取中…';
+  return api('list',{ password:getPw() }).then(function(res){
+    if(!res.ok){ throw new Error(res.error||'讀取失敗'); }
+    tRows=(res.rows||[]).slice().reverse();
+    var classes=[]; tRows.forEach(function(r){ var c=String(r.className); if(classes.indexOf(c)<0) classes.push(c); }); classes.sort();
+    fillClassSelect($('tClass'), classes, true);
+    $('tMsg').textContent=(res.local?'本機模式：只顯示這台裝置的資料。':'')+'更新於 '+fmtTime(new Date()).slice(11);
+    renderTeacher(); return true;
+  });
+}
+function teacherLogin(){
+  var pw=$('tPw').value; if(!pw && CONFIG.SCRIPT_URL){ $('eLogin').textContent='請輸入密碼。'; return; }
+  setPw(pw); $('eLogin').textContent='登入中…';
+  loadTeacher().then(function(){ $('eLogin').textContent=''; $('tLogin').classList.add('hidden'); $('tPanel').classList.remove('hidden'); })
+  .catch(function(e){ setPw(''); $('eLogin').textContent=(e.message==='密碼錯誤'?'密碼不正確。':'無法登入：'+e.message); });
+}
+$('tLoginBtn').addEventListener('click', teacherLogin);
+$('tPw').addEventListener('keydown', function(e){ if(e.key==='Enter') teacherLogin(); });
+$('tLogout').addEventListener('click', function(){ setPw(''); tRows=[]; $('tPw').value=''; $('tPanel').classList.add('hidden'); $('tLogin').classList.remove('hidden'); });
+$('tReload').addEventListener('click', function(){ loadTeacher().catch(function(e){ $('tMsg').textContent='讀取失敗：'+e.message; }); });
+['tClass','tScen','tOnlyFlag','tThr','tCode'].forEach(function(id){ $(id).addEventListener('input', renderTeacher); $(id).addEventListener('change', renderTeacher); });
+$('tTable').addEventListener('click', function(e){ var tr=e.target.closest('tr.r'); if(!tr) return; var id=tr.getAttribute('data-id'); tOpen[id]=!tOpen[id]; renderTeacher(); });
+$('tCopy').addEventListener('click', function(){
+  function q(v){ v=(v==null?'':String(v)); return /[\t\n"]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+  var head=['提交時間','班級','座號或研究代碼','情境代號','情境標題','選擇原因代號','選擇原因','其他原因說明','Q1','Q2','Q3','Q4','Q5','Q6','開始作答時間','作答秒數','裝置','提醒','提交ID'];
+  var lines=[head.join('\t')].concat(filtered().map(function(r){
+    return [r.time,r.className,r.code,r.scenario,r.scenarioTitle,r.reasonCode,r.reason,r.reasonOther,r.q1,r.q2,r.q3,r.q4,r.q5,r.q6,r.startedAt,r.seconds,r.device,flagsOf(r).join('、'),r.id].map(q).join('\t');
+  }));
+  copyText(lines.join('\n'), $('tMsg'));
+});
+$('tImportBtn').addEventListener('click', function(){
+  var codes=$('tImport').value.split(/\s+/).filter(function(x){return x.indexOf('PT1:')===0;});
+  if(!codes.length){ $('tImportMsg').textContent='沒有找到作答碼（應以 PT1: 開頭）。'; return; }
+  var ok=0, dup=0, bad=0;
+  codes.reduce(function(pr,c){ return pr.then(function(){
+    var p; try{ p=fromCode(c); }catch(e){ bad++; return; }
+    return api('save',{ data:p }).then(function(r){ if(r.ok){ r.duplicate?dup++:ok++; } else bad++; }).catch(function(){ bad++; });
+  }); }, Promise.resolve()).then(function(){
+    $('tImportMsg').textContent='新增 '+ok+' 筆，已存在 '+dup+' 筆，失敗 '+bad+' 筆。';
+    if(ok) loadTeacher();
+  });
+});
+$('tScreen').addEventListener('click', function(){ location.hash='screen'; });
+$('tHome1').addEventListener('click', function(e){ e.preventDefault(); goHome(); });
+$('tHome2').addEventListener('click', function(e){ e.preventDefault(); goHome(); });
+function goHome(){ history.replaceState(null,'',location.pathname+location.search); route(); }
+
+/* ---------- 大屏（只顯示完成人數與座號，不顯示作答內容） ---------- */
+function loadScreen(){
+  api('progress',{ password:getPw() }).then(function(res){
+    if(!res.ok) throw new Error(res.error||'讀取失敗');
+    var classes=Object.keys(res.classes||{}).sort();
+    fillClassSelect($('sClass'), classes, false);
+    if(!$('sClass').value && classes.length) $('sClass').value=classes[0];
+    var codes=(res.classes||{})[$('sClass').value]||[];
+    codes=codes.slice().sort(function(a,b){ return (parseFloat(a)-parseFloat(b))||String(a).localeCompare(String(b)); });
+    $('sCount').textContent=codes.length;
+    $('sCodes').innerHTML=codes.map(function(c){return '<span>'+esc(c)+'</span>';}).join('');
+    $('sFoot').textContent='每 15 秒自動更新・最後更新 '+fmtTime(new Date()).slice(11,16);
+  }).catch(function(e){ $('sFoot').textContent='暫時無法更新（'+e.message+'），稍後會再試'; });
+}
+$('sClass').addEventListener('change', loadScreen);
+
+function route(){
+  clearInterval(sTimer);
+  var h=location.hash.replace('#','');
+  if(h==='teacher'){
+    show('teacher');
+    if(getPw() || !CONFIG.SCRIPT_URL){ $('tPw').value=getPw(); teacherLogin(); }
+  } else if(h==='screen'){
+    if(!getPw() && CONFIG.SCRIPT_URL){ location.hash='teacher'; return; }
+    show('screen'); loadScreen(); sTimer=setInterval(loadScreen, 15000);
+  } else if(state.view==='teacher'||state.view==='screen'||document.body.classList.contains('teacher-mode')){
+    show('home', true);
+  }
+}
+window.addEventListener('hashchange', route);
+
+/* ---------- 啟動：檢查未送出的草稿 ---------- */
+(function init(){
+  if(!CONFIG.SCRIPT_URL) $('demoBanner').classList.remove('hidden');
+  var d=loadDraft();
+  if(d && d.className && d.view && d.view!=='home'){
+    $('resumeText').textContent='這台裝置上有一份還沒送出的作答（班級 '+d.className+'、座號／代碼 '+d.studentCode+'）。是你的嗎？';
+    $('resumeBox').classList.remove('hidden');
+    $('resumeYes').onclick=function(){
+      state=Object.assign(freshState(), d); qIndex=d.qIndex||0;
+      $('fClass').value=state.className; $('fCode').value=state.studentCode;
+      $('resumeBox').classList.add('hidden');
+      if(state.view==='reason'){ renderReason(); show('reason'); }
+      else if(state.view==='q'){ renderQ(); show('q'); }
+      else if(state.view==='submit'){ show('submit'); }
+      else show('choose');
+    };
+    $('resumeNo').onclick=function(){ clearDraft(); state=freshState(); $('resumeBox').classList.add('hidden'); };
+  }
+  show('home', true);
+  route();
+})();
+</script>
+</body>
+</html>
