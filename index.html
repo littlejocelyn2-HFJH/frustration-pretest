@@ -386,12 +386,12 @@
   </div>
 </div>
 
-<script src="config.js?v=3"></script>
+<script src="config.js?v=4"></script>
 <script>
 /* 後端網址設定在 config.js（window.MZ_CONFIG.sheetApi）。未設定時為「本機模式」，資料只存在這台裝置。 */
 var CONFIG = {
   SCRIPT_URL: ((window.MZ_CONFIG||{}).sheetApi||'').trim(),
-  VERSION: 'pretest-v1'
+  VERSION: 'pretest-v2'
 };
 
 /* ---------- 情境與題目（文字依研究設計，請勿任意更動） ---------- */
@@ -420,14 +420,18 @@ var QUESTIONS = [
   { title:'事情為什麼會變成這樣？', text:'除了主角自己想到的原因之外，你認為這件事情還可能有哪些原因？',
     hint:'試著從不同角度想一想，不一定只有一個原因。', icon:'branch', tone:'blue' },
   { title:'這個原因會一直存在嗎？', text:'你認為主角這次遇到的困難或失敗原因，以後還會一直存在嗎？為什麼？',
-    hint:'有些事情可能不容易改變，有些事情則可能隨著情況而不同。', icon:'clock', tone:'green' },
+    hint:'有些事情可能不容易改變，有些事情則可能隨著情況而不同。', icon:'clock', tone:'green',
+    choice:{ key:'c3', prompt:'你覺得這次的原因，以後會？', options:['大概會一直存在','可能會隨情況改變','不確定'] } },
   { title:'哪些事情可以改變？', text:'在這個情境中，哪些事情是主角自己可以改變的？哪些事情不一定能由他控制？',
     hint:'試著分別想想看，哪些事情可以靠自己調整，哪些事情可能受到其他因素影響。', icon:'hand', tone:'orange',
-    parts:['主角自己可以改變的事情','不一定能由他控制的事情'] },
+    parts:['主角自己可以改變的事情','不一定能由他控制的事情'],
+    choice:{ key:'c4', prompt:'整體來說，這件事主要是？', options:['主角自己可以控制的','主角不太能控制的','兩者都有','不確定'] } },
   { title:'換個角度想想', text:'如果你是故事中的主角，你會怎麼看待這次的經驗？為什麼？',
-    hint:'你可以同意主角原本的想法，也可以有不同的看法。', icon:'eye', tone:'blue' },
+    hint:'你可以同意主角原本的想法，也可以有不同的看法。', icon:'eye', tone:'blue',
+    choice:{ key:'c5', prompt:'你對這次經驗的看法，和主角原本的想法比較起來？', options:['差不多相同','部分相同','不太一樣','不確定'] } },
   { title:'接下來可以怎麼做？', text:'如果主角之後再次遇到類似的情況，你認為他可以怎麼做？也可以選擇不再嘗試，請說明你的理由。',
-    hint:'沒有一定要選擇哪一種做法，重要的是說明你的想法。', icon:'path', tone:'green' }
+    hint:'沒有一定要選擇哪一種做法，重要的是說明你的想法。', icon:'path', tone:'green',
+    choice:{ key:'c6', prompt:'你覺得主角之後比較適合？', options:['用原本的方式再試一次','換個方法再試','先暫停，之後再決定','不再嘗試這件事','不確定'] } }
 ];
 
 /* ---------- 插畫（同一套人物模組與配色，確保四張風格一致） ---------- */
@@ -637,18 +641,18 @@ var ART = { A:sceneA, B:sceneB, C:sceneC, D:sceneD };
 /* ---------- 狀態 ---------- */
 var DRAFT_KEY = 'frustration-pretest-draft-v1';
 var state = freshState();
-var qIndex = 0;
+var qIndex = 0, qSub = 'open';
 var submitting = false;
 
 function freshState(){
   return { submissionId: uid(), className:'', studentCode:'', scenario:'', reason:'', reasonOther:'',
-           answers:['','','','','',''], parts:{}, startedAt:'', view:'home', qIndex:0 };
+           answers:['','','','','',''], parts:{}, choices:{}, startedAt:'', view:'home', qIndex:0, qSub:'open' };
 }
 function uid(){
   try{ if(window.crypto && crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
   return 'id-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
 }
-function saveDraft(){ try{ state.qIndex=qIndex; localStorage.setItem(DRAFT_KEY, JSON.stringify(state)); }catch(e){} }
+function saveDraft(){ try{ state.qIndex=qIndex; state.qSub=qSub; localStorage.setItem(DRAFT_KEY, JSON.stringify(state)); }catch(e){} }
 function loadDraft(){ try{ var s=localStorage.getItem(DRAFT_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
 function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
 
@@ -737,13 +741,13 @@ $('reasonOpts').addEventListener('input', function(e){ if(e.target.id==='fOther'
 $('reasonNext').addEventListener('click', function(){
   if(!state.reason){ $('eReason').textContent='請選一個選項。'; return; }
   if(state.reason==='5' && !state.reasonOther.trim()){ $('eReason').textContent='選了「其他原因」的話，請簡單寫一下原因。'; return; }
-  qIndex=0; renderQ(); show('q');
+  qIndex=0; qSub='open'; renderQ(); show('q');
 });
 $('reasonBack').addEventListener('click', function(){
   var any=state.answers.some(function(a){return a.trim();});
   if(any){
     confirmBox('換一個故事的話，已經寫好的回答會被清空。確定要換嗎？', function(){
-      state.answers=['','','','','','']; state.parts={}; state.reason=''; state.reasonOther=''; show('choose');
+      state.answers=['','','','','','']; state.parts={}; state.choices={}; state.reason=''; state.reasonOther=''; show('choose');
     });
   } else { show('choose'); }
 });
@@ -760,59 +764,80 @@ function readQ(){
   if(ps){ ps.forEach(function(_,k){ ps[k]=$('ans'+k).value; }); state.answers[qIndex]=partsFilled(qIndex)?combine(qIndex):''; }
   else state.answers[qIndex]=$('ans').value;
 }
+function chosen(i){ var c=QUESTIONS[i].choice; return c ? (state.choices||{})[c.key]||'' : 'n/a'; }
+function qDone(i){ return state.answers[i].trim() && chosen(i); }
 function renderQ(){
   var q=QUESTIONS[qIndex], s=STORIES[state.scenario], ps=partsOf(qIndex);
-  var dots=''; for(var i=0;i<6;i++) dots+='<span class="'+(i===qIndex?'on':(state.answers[i].trim()?'done':''))+'"></span>';
+  if(qSub==='choice' && !q.choice) qSub='open';
+  var dots=''; for(var i=0;i<6;i++) dots+='<span class="'+(i===qIndex?'on':(qDone(i)?'done':''))+'"></span>';
   $('qDots').innerHTML=dots;
+  var head='<div class="qhead">'+iconSvg(q.icon,q.tone)+'<div><div class="qnum">第 '+(qIndex+1)+' 題 / 共 6 題</div><div class="qtitle">'+q.title+'</div></div></div>'+
+    '<details class="recall"><summary>再看一次故事：'+s.title+'</summary><p>'+s.text+'</p></details>'+
+    '<p class="qtext">'+q.text+'</p>';
   var box;
-  if(ps){
-    box=q.parts.map(function(l,k){
+  if(qSub==='choice'){
+    var cur=chosen(qIndex);
+    box='<p class="small" style="margin:0 0 4px">你剛才寫的回答已經保存。再選一個最接近你想法的選項：</p>'+
+      '<p class="qtext" style="margin-top:12px">'+q.choice.prompt+'</p>'+
+      '<div class="opts" role="radiogroup" aria-label="'+esc(q.choice.prompt)+'">'+
+      q.choice.options.map(function(o){
+        return '<label class="opt"><input type="radio" name="qc" value="'+esc(o)+'"'+(cur===o?' checked':'')+'><span class="dot"></span><span>'+o+'</span></label>';
+      }).join('')+'</div>';
+  } else if(ps){
+    box='<p class="qhint">'+q.hint+'</p>'+q.parts.map(function(l,k){
       return '<label for="ans'+k+'" class="part-label">'+(k+1)+'. '+l+'</label>'+
         '<textarea class="input part" id="ans'+k+'" maxlength="1500" placeholder="在這裡寫下你的想法">'+esc(ps[k])+'</textarea>';
     }).join('');
   } else {
-    box='<label for="ans" class="hidden">你的回答</label>'+
+    box='<p class="qhint">'+q.hint+'</p><label for="ans" class="hidden">你的回答</label>'+
       '<textarea class="input" id="ans" maxlength="3000" placeholder="在這裡寫下你的想法">'+esc(state.answers[qIndex])+'</textarea>';
   }
-  $('qCard').innerHTML=
-    '<div class="qhead">'+iconSvg(q.icon,q.tone)+'<div><div class="qnum">第 '+(qIndex+1)+' 題 / 共 6 題</div><div class="qtitle">'+q.title+'</div></div></div>'+
-    '<details class="recall"><summary>再看一次故事：'+s.title+'</summary><p>'+s.text+'</p></details>'+
-    '<p class="qtext">'+q.text+'</p>'+
-    '<p class="qhint">'+q.hint+'</p>'+ box +
-    '<div class="err" id="eAns"></div>';
-  $('qPrev').textContent = qIndex===0 ? '← 回到上一步' : '← 上一題';
-  $('qNext').textContent = qIndex===5 ? '完成，準備送出' : '下一題';
+  $('qCard').innerHTML=head+box+'<div class="err" id="eAns"></div>';
+  $('qPrev').textContent = (qIndex===0 && qSub==='open') ? '← 回到上一步' : '← 上一步';
+  var last = qIndex===5 && (qSub==='choice' || !q.choice);
+  $('qNext').textContent = last ? '完成，準備送出' : '下一步';
   Array.prototype.forEach.call($('qCard').querySelectorAll('textarea'), function(t){
     t.addEventListener('input', function(){ readQ(); $('eAns').textContent=''; saveDraft(); });
   });
+  Array.prototype.forEach.call($('qCard').querySelectorAll('input[name=qc]'), function(r){
+    r.addEventListener('change', function(){ state.choices[q.choice.key]=r.value; $('eAns').textContent=''; saveDraft(); });
+  });
 }
+function goQ(i, sub){ qIndex=i; qSub=sub; renderQ(); saveDraft(); window.scrollTo(0,0); }
 $('qNext').addEventListener('click', function(){
-  readQ();
-  var ps=partsOf(qIndex);
-  if(ps){
-    for(var k=0;k<ps.length;k++){ if(!ps[k].trim()){
-      $('eAns').textContent='「'+QUESTIONS[qIndex].parts[k]+'」這一格還沒有寫喔。寫下你現在想到的就可以。'; $('ans'+k).focus(); return; } }
-  } else if(!state.answers[qIndex].trim()){ $('eAns').textContent='這題還沒有寫喔。寫下你現在想到的就可以。'; $('ans').focus(); return; }
-  if(qIndex<5){ qIndex++; renderQ(); saveDraft(); window.scrollTo(0,0); }
+  var q=QUESTIONS[qIndex];
+  if(qSub==='open'){
+    readQ();
+    var ps=partsOf(qIndex);
+    if(ps){
+      for(var k=0;k<ps.length;k++){ if(!ps[k].trim()){
+        $('eAns').textContent='「'+q.parts[k]+'」這一格還沒有寫喔。寫下你現在想到的就可以。'; $('ans'+k).focus(); return; } }
+    } else if(!state.answers[qIndex].trim()){ $('eAns').textContent='這題還沒有寫喔。寫下你現在想到的就可以。'; $('ans').focus(); return; }
+    if(q.choice){ goQ(qIndex,'choice'); return; }
+  } else {
+    if(!chosen(qIndex)){ $('eAns').textContent='請選一個選項。'; return; }
+  }
+  if(qIndex<5) goQ(qIndex+1,'open');
   else { $('eSubmit').textContent=''; show('submit'); }
 });
 $('qPrev').addEventListener('click', function(){
+  if(qSub==='choice'){ goQ(qIndex,'open'); return; }
   readQ();
-  if(qIndex>0){ qIndex--; renderQ(); saveDraft(); window.scrollTo(0,0); }
+  if(qIndex>0){ var p=qIndex-1; goQ(p, QUESTIONS[p].choice?'choice':'open'); }
   else { renderReason(); show('reason'); }
 });
 
 /* ---------- 送出 ---------- */
 $('submitArt').innerHTML=doneArtSvg();
 $('doneArt').innerHTML=doneArtSvg();
-$('submitBack').addEventListener('click', function(){ qIndex=5; renderQ(); show('q'); });
+$('submitBack').addEventListener('click', function(){ qIndex=5; qSub='choice'; renderQ(); show('q'); });
 
 function validateAll(){
   if(!state.className.trim()||!state.studentCode.trim()) return '班級或座號還沒填寫，請回到首頁補上。';
   if(!STORIES[state.scenario]) return '還沒有選擇故事。';
   if(!state.reason) return '還沒有選擇「為什麼選這個故事」。';
   if(state.reason==='5' && !state.reasonOther.trim()) return '「其他原因」還沒有寫。';
-  for(var i=0;i<6;i++){ if(!state.answers[i].trim()) return '第 '+(i+1)+' 題還沒有寫。'; }
+  for(var i=0;i<6;i++){ if(!state.answers[i].trim()) return '第 '+(i+1)+' 題還沒有寫。'; if(!chosen(i)) return '第 '+(i+1)+' 題的選擇題還沒有選。'; }
   return '';
 }
 function buildPayload(){
@@ -824,6 +849,7 @@ function buildPayload(){
     reasonCode: state.reason, reasonText: r ? r.t : '', reasonOther: state.reason==='5' ? state.reasonOther : '',
     q1: state.answers[0], q2: state.answers[1], q3: state.answers[2],
     q4: state.answers[3], q5: state.answers[4], q6: state.answers[5],
+    c3: state.choices.c3||'', c4: state.choices.c4||'', c5: state.choices.c5||'', c6: state.choices.c6||'',
     startedAt: state.startedAt, clientSubmittedAt: new Date().toISOString(),
     device: deviceType()
   };
@@ -848,7 +874,7 @@ function localRows(){
   return localAll().map(function(p){
     var st=new Date(p.startedAt), en=new Date(p.serverTime);
     return { time:fmtTime(en), className:p.className, code:p.studentCode, scenario:p.scenario, scenarioTitle:p.scenarioTitle,
-      reasonCode:p.reasonCode, reason:p.reasonText, reasonOther:p.reasonOther, q1:p.q1,q2:p.q2,q3:p.q3,q4:p.q4,q5:p.q5,q6:p.q6,
+      reasonCode:p.reasonCode, reason:p.reasonText, reasonOther:p.reasonOther, q1:p.q1,q2:p.q2,q3:p.q3,q4:p.q4,q5:p.q5,q6:p.q6,c3:p.c3,c4:p.c4,c5:p.c5,c6:p.c6,
       startedAt:fmtTime(st), seconds:Math.round((en-st)/1000), device:p.device, id:p.submissionId, note:'' };
   });
 }
@@ -900,7 +926,7 @@ $('submitBtn').addEventListener('click', function(){
 });
 
 $('nextStudent').addEventListener('click', function(){
-  clearDraft(); state=freshState(); qIndex=0;
+  clearDraft(); state=freshState(); qIndex=0; qSub='open';
   $('fClass').value=''; $('fCode').value='';
   show('home');
 });
@@ -951,7 +977,7 @@ function renderTeacher(){
        '<td>'+esc(r.reasonCode)+'. '+esc(r.reason)+(r.reasonOther?'<br><span class="small">'+esc(r.reasonOther)+'</span>':'')+'</td>'+
        '<td>'+secText(r.seconds)+'</td><td>'+esc(r.device)+'</td><td>'+f.map(function(x){return '<span class="flag">'+x+'</span>';}).join('')+(r.note?'<span class="flag">'+esc(r.note)+'</span>':'')+'</td></tr>';
     if(tOpen[r.id]){
-      h+='<tr class="d"><td colspan="8">'+QLABEL.map(function(l,i){ return '<div class="ans-q">'+l+'</div>'+esc(r['q'+(i+1)]); }).join('')+'</td></tr>';
+      h+='<tr class="d"><td colspan="8">'+QLABEL.map(function(l,i){ var c=r['c'+(i+1)]; return '<div class="ans-q">'+l+'</div>'+esc(r['q'+(i+1)])+(c?'\n<span class="flag" style="background:#e4edf3;color:#557a98">選擇：'+esc(c)+'</span>':''); }).join('')+'</td></tr>';
     }
   });
   $('tTable').innerHTML=h+'</tbody>';
@@ -985,9 +1011,9 @@ $('tReload').addEventListener('click', function(){ loadTeacher().catch(function(
 $('tTable').addEventListener('click', function(e){ var tr=e.target.closest('tr.r'); if(!tr) return; var id=tr.getAttribute('data-id'); tOpen[id]=!tOpen[id]; renderTeacher(); });
 $('tCopy').addEventListener('click', function(){
   function q(v){ v=(v==null?'':String(v)); return /[\t\n"]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
-  var head=['提交時間','班級','座號或研究代碼','情境代號','情境標題','選擇原因代號','選擇原因','其他原因說明','Q1','Q2','Q3','Q4','Q5','Q6','開始作答時間','作答秒數','裝置','提醒','提交ID'];
+  var head=['提交時間','班級','座號或研究代碼','情境代號','情境標題','選擇原因代號','選擇原因','其他原因說明','Q1','Q2','Q3','Q4','Q5','Q6','C3','C4','C5','C6','開始作答時間','作答秒數','裝置','提醒','提交ID'];
   var lines=[head.join('\t')].concat(filtered().map(function(r){
-    return [r.time,r.className,r.code,r.scenario,r.scenarioTitle,r.reasonCode,r.reason,r.reasonOther,r.q1,r.q2,r.q3,r.q4,r.q5,r.q6,r.startedAt,r.seconds,r.device,flagsOf(r).join('、'),r.id].map(q).join('\t');
+    return [r.time,r.className,r.code,r.scenario,r.scenarioTitle,r.reasonCode,r.reason,r.reasonOther,r.q1,r.q2,r.q3,r.q4,r.q5,r.q6,r.c3,r.c4,r.c5,r.c6,r.startedAt,r.seconds,r.device,flagsOf(r).join('、'),r.id].map(q).join('\t');
   }));
   copyText(lines.join('\n'), $('tMsg'));
 });
@@ -1047,7 +1073,7 @@ window.addEventListener('hashchange', route);
     $('resumeText').textContent='這台裝置上有一份還沒送出的作答（班級 '+d.className+'、座號／代碼 '+d.studentCode+'）。是你的嗎？';
     $('resumeBox').classList.remove('hidden');
     $('resumeYes').onclick=function(){
-      state=Object.assign(freshState(), d); qIndex=d.qIndex||0;
+      state=Object.assign(freshState(), d); qIndex=d.qIndex||0; qSub=d.qSub||'open';
       $('fClass').value=state.className; $('fCode').value=state.studentCode;
       $('resumeBox').classList.add('hidden');
       if(state.view==='reason'){ renderReason(); show('reason'); }

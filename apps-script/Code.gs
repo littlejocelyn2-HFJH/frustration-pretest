@@ -17,8 +17,17 @@ var HEADERS = [
   '選擇原因代號', '選擇原因', '其他原因說明',
   'Q1_主角感受', 'Q2_其他可能原因', 'Q3_原因是否持續', 'Q4_可改變與不可控制',
   'Q5_如何看待經驗', 'Q6_接下來的做法',
-  '開始作答時間', '作答秒數', '裝置', '提交ID', '版本', '備註'
+  '開始作答時間', '作答秒數', '裝置', '提交ID', '版本', '備註',
+  'C3_原因以後會', 'C4_主要能否控制', 'C5_與主角想法比較', 'C6_主角之後比較適合'
 ];
+
+/* 第3–6題開放題寫完後的補充選擇題（文字須與網頁一致） */
+var CHOICES = {
+  c3: { label: 'C3_原因以後會', prompt: '你覺得這次的原因，以後會？', options: ['大概會一直存在', '可能會隨情況改變', '不確定'] },
+  c4: { label: 'C4_主要能否控制', prompt: '整體來說，這件事主要是？', options: ['主角自己可以控制的', '主角不太能控制的', '兩者都有', '不確定'] },
+  c5: { label: 'C5_與主角想法比較', prompt: '你對這次經驗的看法，和主角原本的想法比較起來？', options: ['差不多相同', '部分相同', '不太一樣', '不確定'] },
+  c6: { label: 'C6_主角之後比較適合', prompt: '你覺得主角之後比較適合？', options: ['用原本的方式再試一次', '換個方法再試', '先暫停，之後再決定', '不再嘗試這件事', '不確定'] }
+};
 
 var SCENARIOS = {
   A: '努力了，成績卻不如預期',
@@ -77,7 +86,8 @@ function requirePw_(pw) {
 
 /* 教師用：讀出全部作答（只有密碼正確才會執行） */
 var ROW_KEYS = ['time', 'className', 'code', 'scenario', 'scenarioTitle', 'reasonCode', 'reason', 'reasonOther',
-  'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'startedAt', 'seconds', 'device', 'id', 'version', 'note'];
+  'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'startedAt', 'seconds', 'device', 'id', 'version', 'note',
+  'c3', 'c4', 'c5', 'c6'];
 
 function listRows_() {
   var sheet = getSheet_();
@@ -153,7 +163,8 @@ function submitResponse(data) {
       clean.device,
       clean.submissionId,
       clean.version,
-      note
+      note,
+      clean.c3, clean.c4, clean.c5, clean.c6
     ].map(safeCell_);
 
     sheet.appendRow(row);
@@ -181,6 +192,7 @@ function validate_(d) {
   };
   // 六題原始答案：完整保留（只限制最長長度）
   for (var i = 1; i <= 6; i++) out['q' + i] = s(d['q' + i]).slice(0, MAX_LEN);
+  Object.keys(CHOICES).forEach(function (k) { out[k] = s(d[k]).trim(); });
 
   if (!out.submissionId) throw new Error('缺少提交ID');
   if (!out.className) throw new Error('缺少班級');
@@ -192,6 +204,9 @@ function validate_(d) {
   for (var j = 1; j <= 6; j++) {
     if (!out['q' + j].trim()) throw new Error('第 ' + j + ' 題沒有作答');
   }
+  Object.keys(CHOICES).forEach(function (k) {
+    if (CHOICES[k].options.indexOf(out[k]) < 0) throw new Error(CHOICES[k].label + ' 沒有選或選項不正確');
+  });
   return out;
 }
 
@@ -209,6 +224,10 @@ function getSheet_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) { setupSheet(); sheet = ss.getSheetByName(SHEET_NAME); }
+  // 欄位有新增時（例如加了 C3–C6），自動補上標題列
+  if (sheet.getLastColumn() < HEADERS.length) {
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]).setFontWeight('bold').setBackground('#e4edf3').setWrap(true);
+  }
   return sheet;
 }
 
@@ -223,6 +242,7 @@ function setupSheet() {
   sheet.setColumnWidths(1, 8, 120);
   sheet.setColumnWidths(9, 6, 320);
   sheet.getRange(2, 9, sheet.getMaxRows() - 1, 6).setWrap(true).setVerticalAlignment('top');
+  sheet.setColumnWidths(21, 4, 160);
   sheet.getRange(1, 1, sheet.getMaxRows(), 3).setNumberFormat('@'); // 班級、代碼保持文字（例如 012 不會變成 12）
 
   var q = ss.getSheetByName(QUESTION_SHEET_NAME) || ss.insertSheet(QUESTION_SHEET_NAME);
@@ -244,10 +264,14 @@ function setupSheet() {
     ['', '', '', ''],
     ['原因代號', '選擇原因', '', ''],
     ['1', REASONS['1'], '', ''], ['2', REASONS['2'], '', ''], ['3', REASONS['3'], '', ''],
-    ['4', REASONS['4'], '', ''], ['5', '其他原因（文字見「其他原因說明」欄）', '', '']
-  ];
+    ['4', REASONS['4'], '', ''], ['5', '其他原因（文字見「其他原因說明」欄）', '', ''],
+    ['', '', '', ''],
+    ['補充選擇題欄位', '出現位置', '題目', '選項']
+  ].concat(Object.keys(CHOICES).map(function (k) {
+    return [CHOICES[k].label, '第' + k.slice(1) + '題開放題寫完後', CHOICES[k].prompt, CHOICES[k].options.join('／')];
+  }));
   q.getRange(1, 1, rows.length, 4).setValues(rows).setWrap(true).setVerticalAlignment('top');
-  [1, 9, 15].forEach(function (r) { q.getRange(r, 1, 1, 4).setFontWeight('bold').setBackground('#e5efe7'); });
+  [1, 9, 15, 22].forEach(function (r) { q.getRange(r, 1, 1, 4).setFontWeight('bold').setBackground('#e5efe7'); });
   q.setColumnWidth(1, 150); q.setColumnWidth(2, 220); q.setColumnWidth(3, 420); q.setColumnWidth(4, 360);
 }
 
@@ -258,6 +282,7 @@ function testSubmit() {
     className: 'TEST', studentCode: '00', reasonCode: '5', reasonOther: '測試用的其他原因',
     q1: '測試回答1', q2: '=這行以等號開頭', q3: '-以減號開頭', q4: '測試回答4',
     q5: '測試回答5\n第二行', q6: '測試回答6',
+    c3: '不確定', c4: '兩者都有', c5: '部分相同', c6: '不再嘗試這件事',
     startedAt: new Date(Date.now() - 600000).toISOString(), device: '電腦'
   };
   ['A', 'B', 'C', 'D'].forEach(function (k) {
