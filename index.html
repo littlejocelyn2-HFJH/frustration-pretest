@@ -219,7 +219,7 @@
       <p id="resumeText"></p>
       <div class="btns">
         <button class="btn btn-sm btn-orange" id="resumeYes" type="button">繼續作答</button>
-        <button class="btn btn-sm btn-line" id="resumeNo" type="button">不是我的，重新開始</button>
+        <button class="btn btn-sm btn-line" id="resumeNo" type="button">重新開始</button>
       </div>
     </div>
 
@@ -310,10 +310,7 @@
     <div class="card center" style="padding:36px 24px">
       <div class="done-art" id="doneArt"></div>
       <h2>已經送出了</h2>
-      <p style="color:#46525a;margin:6px 0 0">謝謝你！你可以把畫面拿給老師看，或安靜等待其他同學完成。</p>
-      <div class="actions" style="justify-content:center;margin-top:26px">
-        <button class="btn btn-ghost btn-sm" type="button" id="nextStudent">換下一位同學作答</button>
-      </div>
+      <p style="color:#46525a;margin:6px 0 0">謝謝你！你的想法已經收到了，現在可以關閉這個網頁。</p>
     </div>
   </section>
 
@@ -925,12 +922,6 @@ $('submitBtn').addEventListener('click', function(){
   });
 });
 
-$('nextStudent').addEventListener('click', function(){
-  clearDraft(); state=freshState(); qIndex=0; qSub='open';
-  $('fClass').value=''; $('fCode').value='';
-  show('home');
-});
-
 /* ---------- 自訂確認視窗 ---------- */
 var modalCb=null;
 function confirmBox(text, cb){ $('modalText').textContent=text; modalCb=cb; $('modal').classList.remove('hidden'); $('modalYes').focus(); }
@@ -1070,7 +1061,7 @@ window.addEventListener('hashchange', route);
   if(!CONFIG.SCRIPT_URL) $('demoBanner').classList.remove('hidden');
   var d=loadDraft();
   if(d && d.className && d.view && d.view!=='home'){
-    $('resumeText').textContent='這台裝置上有一份還沒送出的作答（班級 '+d.className+'、座號／代碼 '+d.studentCode+'）。是你的嗎？';
+    $('resumeText').textContent='你上次還沒寫完（班級 '+d.className+'、座號 '+d.studentCode+'）。要接著寫嗎？';
     $('resumeBox').classList.remove('hidden');
     $('resumeYes').onclick=function(){
       state=Object.assign(freshState(), d); qIndex=d.qIndex||0; qSub=d.qSub||'open';
