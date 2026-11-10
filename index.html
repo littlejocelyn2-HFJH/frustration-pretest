@@ -137,7 +137,7 @@
   /* modal */
   .modal{position:fixed;inset:0;background:rgba(40,35,30,.35);display:grid;place-items:center;padding:20px;z-index:20}
   .modal .card{max-width:440px}
-  .modal p{margin:0 0 6px}
+  .modal p{margin:0 0 6px;white-space:pre-line}
 
   .done-art svg{width:min(320px,80%);height:auto;display:block;margin:0 auto 10px}
   .center{text-align:center}
@@ -384,7 +384,7 @@
   </div>
 </div>
 
-<script src="config.js?v=6"></script>
+<script src="config.js?v=7"></script>
 <script>
 /* 後端網址設定在 config.js（window.MZ_CONFIG.sheetApi）。未設定時為「本機模式」，資料只存在這台裝置。 */
 var CONFIG = {
@@ -971,7 +971,8 @@ function renderTeacher(){
        '<td>'+esc(r.reasonCode)+'. '+esc(r.reason)+(r.reasonOther?'<br><span class="small">'+esc(r.reasonOther)+'</span>':'')+'</td>'+
        '<td>'+secText(r.seconds)+'</td><td>'+esc(r.device)+'</td><td>'+f.map(function(x){return '<span class="flag">'+x+'</span>';}).join('')+(r.note?'<span class="flag">'+esc(r.note)+'</span>':'')+'</td></tr>';
     if(tOpen[r.id]){
-      h+='<tr class="d"><td colspan="8">'+QLABEL.map(function(l,i){ var c=r['c'+(i+1)]; return '<div class="ans-q">'+l+'</div>'+esc(r['q'+(i+1)])+(c?'\n<span class="flag" style="background:#e4edf3;color:#557a98">選擇：'+esc(c)+'</span>':''); }).join('')+'</td></tr>';
+      h+='<tr class="d"><td colspan="8">'+QLABEL.map(function(l,i){ var c=r['c'+(i+1)]; return '<div class="ans-q">'+l+'</div>'+esc(r['q'+(i+1)])+(c?'\n<span class="flag" style="background:#e4edf3;color:#557a98">選擇：'+esc(c)+'</span>':''); }).join('')+
+        '<div style="margin-top:14px;text-align:right"><button class="btn btn-line btn-sm" type="button" data-del="'+esc(r.id)+'">刪除這筆</button></div></td></tr>';
     }
   });
   $('tTable').innerHTML=h+'</tbody>';
@@ -1002,7 +1003,21 @@ $('tPw').addEventListener('keydown', function(e){ if(e.key==='Enter') teacherLog
 $('tLogout').addEventListener('click', function(){ setPw(''); tRows=[]; $('tPw').value=''; $('tPanel').classList.add('hidden'); $('tLogin').classList.remove('hidden'); });
 $('tReload').addEventListener('click', function(){ loadTeacher().catch(function(e){ $('tMsg').textContent='讀取失敗：'+e.message; }); });
 ['tClass','tScen','tOnlyFlag','tThr','tCode'].forEach(function(id){ $(id).addEventListener('input', renderTeacher); $(id).addEventListener('change', renderTeacher); });
-$('tTable').addEventListener('click', function(e){ var tr=e.target.closest('tr.r'); if(!tr) return; var id=tr.getAttribute('data-id'); tOpen[id]=!tOpen[id]; renderTeacher(); });
+$('tTable').addEventListener('click', function(e){
+  var del=e.target.closest('[data-del]');
+  if(del){
+    var id=del.getAttribute('data-del'), r=tRows.filter(function(x){return x.id===id;})[0]; if(!r) return;
+    confirmBox('確定要刪除這筆嗎？\n班級 '+r.className+'、座號 '+r.code+'、情境 '+r.scenario+'（'+r.time+'）\n刪除的資料會移到試算表的「已刪除」分頁，需要時可以找回。', function(){
+      $('tMsg').textContent='刪除中…';
+      api('delete',{ password:getPw(), id:id }).then(function(res){
+        if(!res.ok) throw new Error(res.error||'刪除失敗');
+        delete tOpen[id]; return loadTeacher();
+      }).then(function(){ $('tMsg').textContent='已刪除（已移到「已刪除」分頁）'; })
+      .catch(function(err){ $('tMsg').textContent='刪除沒有成功：'+err.message; });
+    });
+    return;
+  }
+  var tr=e.target.closest('tr.r'); if(!tr) return; var id=tr.getAttribute('data-id'); tOpen[id]=!tOpen[id]; renderTeacher(); });
 $('tCopy').addEventListener('click', function(){
   function q(v){ v=(v==null?'':String(v)); return /[\t\n"]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
   var head=['提交時間','班級','座號或研究代碼','情境代號','情境標題','選擇原因代號','選擇原因','其他原因說明','Q1','Q2','Q3','Q4','Q5','Q6','C3','C4','C5','開始作答時間','作答秒數','裝置','提醒','提交ID'];

@@ -9,6 +9,7 @@ var TEACHER_PASSWORD = 'change-me'; // 第 8 行：沒設指令碼屬性時才�
 
 var SHEET_NAME = '前測資料';
 var QUESTION_SHEET_NAME = '題目對照';
+var DELETED_SHEET_NAME = '已刪除';
 var TIMEZONE = 'Asia/Taipei';
 var MAX_LEN = 3000;
 
@@ -59,6 +60,9 @@ function doPost(e) {
     } else if (action === 'list') {
       requirePw_(body.password);
       result = { ok: true, rows: listRows_() };
+    } else if (action === 'delete') {
+      requirePw_(body.password);
+      result = deleteRow_(String(body.id || ''));
     } else if (action === 'progress') {
       requirePw_(body.password);
       result = { ok: true, classes: progress_() };
@@ -99,6 +103,37 @@ function listRows_() {
     ROW_KEYS.forEach(function (k, i) { o[k] = r[i]; });
     return o;
   });
+}
+
+/* 教師刪除：整列移到「已刪除」分頁（不直接消失，需要時可複製回來） */
+function deleteRow_(id) {
+  if (!id) throw new Error('缺少提交ID');
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = getSheet_();
+    var last = sheet.getLastRow();
+    if (last < 2) throw new Error('找不到這筆資料');
+    var idCol = HEADERS.indexOf('提交ID') + 1;
+    var cell = sheet.getRange(2, idCol, last - 1, 1)
+      .createTextFinder(id).matchEntireCell(true).findNext();
+    if (!cell) throw new Error('找不到這筆資料（可能已被刪除）');
+    var rowNum = cell.getRow();
+    var values = sheet.getRange(rowNum, 1, 1, HEADERS.length).getValues()[0];
+    var bin = ss.getSheetByName(DELETED_SHEET_NAME);
+    if (!bin) {
+      bin = ss.insertSheet(DELETED_SHEET_NAME);
+      bin.getRange(1, 1, 1, HEADERS.length + 1).setValues([['刪除時間'].concat(HEADERS)])
+        .setFontWeight('bold').setBackground('#f8e9db');
+      bin.setFrozenRows(1);
+    }
+    bin.appendRow([fmt_(new Date())].concat(values.map(safeCell_)));
+    sheet.deleteRow(rowNum);
+    return { ok: true };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 /* 大屏用：每班已完成的座號（不含任何作答內容） */
